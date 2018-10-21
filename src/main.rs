@@ -35,9 +35,17 @@ fn main() -> Result<(), Error> {
     let mut phase = 0.0;
     let mut freq = 220.0;
 
+    let mut gate = 0.0;
+
     let synth = move |_t: f64, _dt: f64, _action: Option<KeyAction>| {
         if let Some(new_freq) = transform_key_action(_action) {
             freq = new_freq;
+        }
+
+        if let Some(KeyAction::Press(_)) = _action {
+            gate = 1.0;
+        } else if let Some(KeyAction::Release(_)) = _action {
+            gate = 0.0;
         }
 
         phase += freq * _dt * 2.0 * PI;
@@ -59,7 +67,7 @@ fn main() -> Result<(), Error> {
             signal_buffer.clear();
         }
 
-        my_value
+        my_value * gate
     };
 
     audioengine.set_processor_function(Box::new(synth));
