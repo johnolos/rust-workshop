@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Raleway);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700,400italic);
+
+      body { font-family: 'Raleway'; }
+      h1, h2, h3 {
+        font-family: 'Raleway';
+        font-weight: normal;
+      }
+      code {
+        -webkit-border-radius: 6px;
+        -moz-border-radius: 6px;
+        border-radius: 6px;
+        background-color: #333; color: #fff; padding: 1em 2em;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Anonymous Pro'; }
+
+      .remark-code {
+        background: rgb(39, 35, 43);
+      }
+
+      .remark-code-span-highlighted {
+        filter: brightness(85%);
+      }
+
+      .remark-code-span-highlighted {
+        background-color: rgba(190, 190, 190, 0.3);
+      }
+
+      .rust-logo-center {
+        width: 350px;
+        height: 100px;
+        background-image: url(assets/rust-logo.svg);
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 350px 100px;
+        width: 50%;
+        margin: 0 auto;
+      }
+
+      .mb { /* mono-block */
+        font-family: monospace;
+        display: inline-block;
+        /* margin: 0 0 0 0; */
+      }
+
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle
+
+# Cheatsheet
+
+<div class="rust-logo-center"></div>
+
+---
+
+# Contents
+
+1. Basic syntax
+2. Variabler
+3. Structs
+4. Enums
+5. Traits
+6. Impl
+7. Pattern-matching
+8. Ownership
+9. References
+10. Threads and channels
+11. clippy
+12. rustfmt
+13. rustfix
+14. Nyttige ressuers
+
+---
+name: code
+class: middle
+exclude: true
+---
+template: code
+
+###.top[.center[Basic syntax]]
+
+Klassisk "Hello, World" eksempel.
+```rust
+fn main() {
+  let s = "Hello, World";
+  println!(s);
+}
+```
+Husk at variabler er scoped og Rust har _move_-semantics.
+```rust
+// hello is not valid here, it's not declared yet
+{
+  // hello is valid from this point forward
+  let hello = "world";
+  // do something with hello
+}
+// this scope is over, and therefore hello is no longer valid
+
+
+println!("{}", hello);
+//  9 |     println!("{}", hello)
+//    |                    ^^^^^ not found in this scope
+```
+---
+template: code
+
+###.top[.center[Variabler]]
+
+Immutable by default
+```rust
+{
+  let x = 5;
+  x = 3;
+  println!("{}", x)
+}
+// error[E0384]: cannot assign twice to immutable variable x
+//  --> src/main.rs:4:5
+//  2 |     let x = 5;
+//    |         - first assignment to x
+//  3 |
+//  4 |     x = 3;
+//    |     ^^^^^ cannot assign twice to immutable variable
+```
+
+Bruk _mut_ for å fortelle rust at variabelen kan endres.
+```rust
+{
+  let mut x = 5;
+  x = 3;
+  println!("{}", x) // 3
+}
+```
+
+---
+template: code
+
+###.top[.center[Structs]]
+
+```rust
+#[derive(Debug)]
+struct Employee {
+  name: String,
+  id: i32
+}
+
+fn main() {
+  let e: Employee = Employee {
+    name: String::from("Jon Snow"),
+    id: 230
+  };
+
+  println!("{:?}", e) // Employee { name: "Jon Snow", id: 230 }
+}
+```
+<p class="mb">__#[derive(Debug)]__</p> brukes for å kunne printe innholdet i en struct. <br/>
+
+<div>Merk at vi bruker <p class="mb">"{:?}"</p> for debug-print i stedet for vanligvis <p class="mb">"{}"</p>.</div>
+---
+template: code
+
+###.top[.center[Enums]]
+
+```rust
+enum Position {
+  CEO,
+  CTO,
+  PrincipalEngineer,
+  Senior,
+  Junior
+}
+
+let p = Position::CEO;
+```
+
+Common enums from the standard library.
+```rust
+enum Result<T, E> {
+  Ok(T),
+  Err(E),
+}
+
+enum Option<T> {
+  Some(T),
+  None
+}
+```
+
+---
+template: code
+
+###.top[.center[Traits]]
+
+```rust
+trait Animal {
+  // Statically method signature; Self refers to the type being implemented for.
+  fn new(name: &'static str) -> Self;
+
+  // Method signatures for the instance
+  fn name(&self) -> &'static str;
+  fn noise(&self) -> &'static str;
+
+  // Traits can define default implementation
+  fn talk(&self) {
+      println!("{} says {}", self.name(), self.noise());
+  }
+}
+```
+
+
+---
+template: code
+
+###.top[.center[Impl]]
+
+```rust
+struct Sheep { naked: bool, name: &'static str }
+
+impl Sheep {...} // Internal methods defined for Sheep
+
+trait Animal {...} // Defined as in last slide
+
+// Implements Animal for Sheep.
+impl Animal for Sheep {
+    // Self in this context is now Sheep
+    fn new(name: &'static str) -> Sheep {
+        Sheep { name: name, naked: false }
+    }
+
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
+    fn noise(&self) -> &'static str {...}
+
+    // Default implementation overridden
+    fn talk(&self) {
+      // Another implementation
+    }
+}
+```
+
+---
+template: code
+
+###.top[.center[Matching]]
+
+```rust
+fn main() {
+  let x = Some(5); // integer wrapped in an Option
+
+  match x {
+    Some(i) => println!("{}", i), // i is unwrapped from Option.
+    None => () // void - don't do anything
+  }
+
+  // Equivalent to expression above
+  if let Some(i) = x {
+    println!("{}" , i);
+  }
+}
+```
+
+---
+template: code
+
+###.top[.center[Pattern matching]]
+
+```rust
+enum IpAddress {
+  V4(u8, u8, u8, u8),
+  V6(String),
+}
+
+fn main() {
+    let x = IpAddress::V6(String::from("::1"));
+
+    match x {
+      V4 ( 192, 168, z, w) => // Home address
+      V4 ( x, y , z, w ) => // Everything else IPv4 related
+      V6 ( s ) => // Handle IPv6 cases
+    }
+}
+
+```
+
+---
+template: code
+
+###.top[.center[Ownership]]
+
+Rust har tre enkle regler til eierskap:
+- Enhver verdi i Rust har en variabel som forteller hvem som eier den.
+- Det finnes bare en eier til enhver tid.
+- Når eieren ikke finnes i scope lengere, så vil verdien deallokeres eller droppes.
+
+Enten én eller flere referanser <u>**eller**</u> én muterende referanse.
+
+
+```rust
+// hello is not valid here, it's not declared yet
+{
+  // hello is valid from this point forward
+  let hello = "world";
+  // do something with hello
+}
+// this scope is over, and therefore hello is no longer valid
+
+println!("{}", hello);
+//  9 |     println!("{}", hello)
+//    |                    ^^^^^ not found in this scope
+```
+
+---
+template: code
+
+###.top[.center[References]]
+
+* &-symbol
+
+```rust
+#[derive(Debug)]
+struct BankApi<'a> {
+    api_key: &'a str
+}
+
+#[derive(Debug)]
+struct TransferApi<'a> {
+    api_key: &'a str
+}
+
+fn main() {
+  let api_key = &"secret_api_key";
+
+  let bank_api = BankApi { api_key };
+  let transfer_api = TransferApi { api_key };
+
+  println!("{:?}", bank_api);
+  // BankApi { api_key: "secret_api_key" }
+  println!("{:?}", transfer_api);
+  // TransferApi { api_key: "secret_api_key" }
+}
+```
+
+---
+template: code
+
+###.top[.center[Threads & Channels]]
+
+```rust
+use std::thread;
+use std::sync::mpsc::channel;
+
+fn main() {
+    // Establish a communication channel between our threads.
+    let (sender, receiver) = channel::<i32>();
+
+    let thread_one = thread::spawn(move || {
+        // Blocks until it receives an integer from receiver-channel.
+        if let Ok(x) = receiver.recv() {
+            println!("{}", x)
+        }
+    });
+
+    let thread_two = thread::spawn(move || {
+        // Sends value 1 using sender-channel.
+        sender.send(1).unwrap();
+    });
+
+    // Wait until the threads are done
+    let _res_one = child_one.join();
+    let _res_two = child_two.join();
+} // Prints 1
+```
+
+---
+template: code
+
+###.top[.center[clippy (recommended)]]
+
+__clippy__ hjelper deg med å fange vanlige programmeringsfeil i rust.
+
+### Intallering
+
+```bash
+$ rustup component add clippy-preview
+```
+
+
+### Bruk
+
+```bash
+$ cargo clippy
+```
+
+---
+template: code
+
+###.top[.center[rustfmt (optional)]]
+
+__rustfmt__ formaterer rust-koden din til ett sett med standardregler.
+
+### Intallering
+
+```bash
+$ rustup component add rustfmt-preview
+```
+
+
+### Bruk
+
+```bash
+$ cargo fmt
+```
+
+---
+template: code
+
+###.top[.center[rustfix (optional)]]
+
+__rustfix__ utfører forslag som rust-kompilatoren foreslår.
+
+Verktøyet er veldig nytt og gir ikke alt for mye nytteverdi, men verdt å nevne.
+
+### Intallering
+
+```bash
+$ cargo install cargo-fix
+```
+
+### Bruk
+
+```bash
+$ cargo fix
+```
+
+---
+
+# Nyttige ressuser
+
+* [https://doc.rust-lang.org/stable/rust-by-example/](https://doc.rust-lang.org/stable/rust-by-example/)
+
+
+Endel av eksemplene i denne presentasjonen er hetet fra samme bok.
+
+Anbefales å lese utdrag fra den boken skulle man stå fast.
+
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create({
+        highlightStyle: 'atom-one-dark',
+        highlightSpans: true,
+        countIncrementalSlides: false
+      });
+    </script>
+  </body>
+</html>
