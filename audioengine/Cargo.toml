@@ -1,0 +1,6 @@
+[package]
+name = "audioengine"
+version = "0.1.0"
+
+[dependencies]
+portaudio = "0.7.0"
