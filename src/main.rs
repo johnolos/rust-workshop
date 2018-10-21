@@ -15,6 +15,17 @@ use ui::Ui;
 #[allow(unused_imports)]
 use std::f64::consts::PI;
 
+const C_FREQUENCY: f64 = 261.63;
+const HALFSTEP_EXP: f64 = 1.059_463_094_36;
+
+fn transform_key_action(action: Option<KeyAction>) -> Option<f64> {
+    match action {
+        Some(KeyAction::Press(key_index)) => Some(C_FREQUENCY * HALFSTEP_EXP.powi(key_index)),
+        Some(KeyAction::Release(_)) => None,
+        _ => None
+    }
+}
+
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
@@ -22,9 +33,13 @@ fn main() -> Result<(), Error> {
     let mut signal_buffer = SignalBuffer::new();
 
     let mut phase = 0.0;
+    let mut freq = 220.0;
 
     let synth = move |_t: f64, _dt: f64, _action: Option<KeyAction>| {
-        let freq = 440.0;
+        if let Some(new_freq) = transform_key_action(_action) {
+            freq = new_freq;
+        }
+
         phase += freq * _dt * 2.0 * PI;
 
         let mut phase_crossed_zero = false;
