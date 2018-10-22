@@ -6,7 +6,7 @@ Formålet med workshopen er å lære litt om Rust, litt om lyd og forhåpenligvi
 Bygge: `cargo build`
 Kjøre: `cargo run`
 
-Samt støtteverktøy hvis du installerte dette fra smoketesten:
+_ Samt støtteverktøy hvis du installerte dette fra smoketesten _:
 Linting: `cargo clippy`
 Formattering: `cargo fmt`
 Auto-fiks: `cargo fix`
@@ -28,6 +28,7 @@ for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: f
 `dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
 som representerer oscillatorens utgangssignal.
 
+Når du har fått til å lage en oscillator, kan du flytte oscillator-funksjonaliteten ut i en egen `struct`.
 
 ## 2. Visualisering av oscillatoren
 Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
@@ -64,24 +65,28 @@ Et hint: Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f6
 
 
 ## 3. Lag et `Keyboard`
-I denne oppgaven skal vi definitere en `Keyboard`-struct som skal holde tilstand på hvilken knapp vi holder nede. I tillegg skal den transformere lyden vi mottar til riktig toneart. Toner er definiert ut i fra A som starter på f.eks på 220.0 Hz og øker ekponensielt. Oktaven over starter på 440.0Hz. Vi har behov for å transformere den `A-en` til en knappen vi holder inne på tastaturet.
 
-Implementer følgende funksjoner for `Keyboard`.
-1. `new()`
-  - En hjelpefunksjon som oppretter et `Keyboard`-objekt som har verdien satt til None. Vi benytter oss av `i32` som forteller hvilken knapp det er, men husk at vi ikke alltid holder en knapp inne.
-2. `update_current_key(...)`
-  - Denne funksjonen skal mutere seg selv ved å oppdatere tilstanden til om hvilken knapp er holdt nede.
-  - Videre skal funksjonen motta en enum av typen `KeyAction` som er definitert i `audioengine::types::KeyAction`. Enumen har to tilstander, `Press` og `Release`.
-  - Ved `Press` skal vi oppdatere nåværende tilstand, ved `Release` skal vi fjerne nåværende knapp som vi har holdt inne.
-  - Tips: Vi har syntaktisk hjelpemidler som `pattern matching` og `if let` til å hjelpe oss her.
-3. `process(...)`
-  - Process sjekker om vi faktisk får en `KeyAction`-input, hvis ja så kaller den `update_current_key`.
-  - Verdien som returneres fra `process()` skal være som følger:
-      - `base-frekvens * 12th-root(2)^(k + 3), der k er verdien på input-knappen` //TODO: Mer pedagogisk
-      - Forklaringen til (k + 3) er at man forskyver A-tonen til C-tone som er starten på en oktav.
+### Sammenheng mellom toner og frekvenser
+`ISO 16` definerer at en `enstrøken A` skal ha en frekvens på _440.0 Hz_, og ut ifra denne frekvensen kan alle andre noter defineres.
+Å spille samme tone en oktav over, betyr i praksis en dobling av frekvens, uansett hvilken grunntone. Dette betyr altså at en `tostrøken A`
+har en frekvens på `440.0 * 2.0 = 880.0 Hz`, og en `trestrøken A` en frekvens på `880.0 * 2.0 = 1760.0 Hz`.
 
-Vi skal ikke bekymre oss for selve keyboard-mappingen. Dette har vi allerede tatt hånd om i `ui.rs`.
+Det er tolv halvtoner i en oktav, og på grunn toner sin eksponensielle natur, betyr dette at det finnes et tall, `x`, som beskriver forholdet
+mellom alle halvtoner. Siden vi vet at å flytte en tone opp en oktav betyr en dobling av frekvens, kan vi bruke dette forholdet til å finne `x`:
 
+```
+1.0 * x * x * x * x * x * x * x * x * x * x * x * x = 2.0
+x^12 = 2.0
+x = 12th_root(2.0)
+x = 1.05946309436
+```
+
+### Oppgave
+I denne oppgaven skal du lage en komponent som tar inn en heltallsverdi (hvilken knapp som er trykket ned, øker mot høyre på tastaturet),
+og gir ut hvilken frekvens oscillatoren skal spille av.
+
+`synth(...)`-funksjonen hvor du implementerte oscillatoren i oppgave 1, tar inn et argument for hvilken knapp du har trykket på. Dette argumentet
+er av typen `KeyAction`, som er definert i `./audioengine/src/types.rs` -- ta en titt på denne typen for å finne ut hvordan den skal brukes.
 
 ## 4. Implementere en forsterker og fullføre en minimal synthesizer
 Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
