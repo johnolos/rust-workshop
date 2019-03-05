@@ -38,11 +38,6 @@ fn main() -> Result<(), Error> {
             freq = new_freq;
         }
 
-        gate = match _action {
-            Some(_) => 1.0,
-            None => 0.0
-        };
-
         phase += freq * _dt * 2.0 * PI;
 
         let mut phase_crossed_zero = false;
@@ -51,7 +46,7 @@ fn main() -> Result<(), Error> {
             phase_crossed_zero = true;
         }
 
-        let my_value = phase.sin() * gate;
+        let my_value = phase.sin();
 
         signal_buffer.push_back(my_value);
 
