@@ -23,7 +23,7 @@ fn main() -> Result<(), Error> {
 
     let mut phase = 0.0;
 
-    let synth = move |_t: f64, _dt: f64, _action: Option<KeyAction>| {
+    let synth = move |_t: f64, _dt: f64, _action: Option<i32>| {
         let freq = 440.0;
         phase += freq * _dt * 2.0 * PI;
 
@@ -38,9 +38,7 @@ fn main() -> Result<(), Error> {
         signal_buffer.push_back(my_value);
 
         if phase_crossed_zero {
-            sender.send((GraphEventType::SignalGraph,
-            signal_buffer.clone(),
-            4410));
+            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410));
             signal_buffer.clear();
         }
 

@@ -1,4 +1,5 @@
 extern crate portaudio;
+
 use portaudio::DeviceIndex;
 use portaudio as pa;
 
@@ -9,6 +10,8 @@ const SAMPLE_RATE: f64 = 44_100.0;
 const FRAME_SIZE: u32 = 128;
 
 use types::KeyAction;
+use std::collections::VecDeque;
+use keys_state::KeysState;
 
 #[allow(dead_code)]
 pub struct Engine {
@@ -68,7 +71,7 @@ impl EngineController {
         self.engine.key_action_signal.send(action).unwrap();
     }
 
-    pub fn set_processor_function(&self, new_func: Box<FnMut(f64, f64, Option<KeyAction>) -> f64>) {
+    pub fn set_processor_function(&self, new_func: Box<FnMut(f64, f64, Option<i32>) -> f64>) {
         self.engine.signal_processor_change_sender.send(new_func).unwrap();
     }
 
@@ -147,8 +150,10 @@ impl Engine {
         let mut keys_pressed: [bool; 20] = [false; 20];
         let mut new_signal_fn: Option<fn(f64) -> f64> = None;
 
-        let mut audio_processor_function: Box<FnMut(f64, f64, Option<KeyAction>) -> f64> = Box::new(|_, _, _| 0.0);
-        let mut current_key: Option<KeyAction> = None;
+        let mut audio_processor_function: Box<FnMut(f64, f64, Option<i32>) -> f64> = Box::new(|_, _, _| 0.0);
+        let mut current_key: Option<i32> = None;
+
+        let mut keys_state = KeysState::new();
 
         let mut running_time = 0.0;
 
@@ -167,7 +172,7 @@ impl Engine {
             }
 
             for _key in key_action_slot.try_iter() {
-                current_key = Some(_key);
+                current_key = keys_state.key_down(_key);
             }
 
             for _new_processor in signal_processor_change_receiver.try_iter() {
