@@ -17,9 +17,21 @@ use std::f64::consts::PI;
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
+    let mut phase = 0.0;
+
     let synth = move |_t: f64, _dt: f64, _action: Option<i32>| {
-        // TODO: Implement your synthesizer here
-        0.0
+        let freq = 440.0;
+        phase += freq * _dt * 2.0 * PI;
+
+        let mut phase_crossed_zero = false;
+        if phase > PI {
+            phase -= 2.0 * PI;
+            phase_crossed_zero = true;
+        }
+
+        let my_value = phase.sin();
+
+        my_value
     };
 
     audioengine.set_processor_function(Box::new(synth));
