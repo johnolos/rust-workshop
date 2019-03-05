@@ -17,7 +17,7 @@ use std::f64::consts::PI;
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
-    let synth = move |_t: f64, _dt: f64, _action: Option<KeyAction>| {
+    let synth = move |_t: f64, _dt: f64, _action: Option<i32>| {
         // TODO: Implement your synthesizer here
         0.0
     };

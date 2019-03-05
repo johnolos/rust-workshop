@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 pub type Phase = f64;
 pub type Signal = f64;
 
-pub type SignalProcessorFunction = Box<FnMut(f64, f64, Option<KeyAction>) -> Signal>;
+pub type SignalProcessorFunction = Box<FnMut(f64, f64, Option<i32>) -> Signal>;
 
 #[derive(Clone, Copy)]
 pub enum KeyAction {
