@@ -18,12 +18,8 @@ use std::f64::consts::PI;
 const C_FREQUENCY: f64 = 261.63;
 const HALFSTEP_EXP: f64 = 1.059_463_094_36;
 
-fn transform_key_action(action: Option<KeyAction>) -> Option<f64> {
-    match action {
-        Some(KeyAction::Press(key_index)) => Some(C_FREQUENCY * HALFSTEP_EXP.powi(key_index)),
-        Some(KeyAction::Release(_)) => None,
-        _ => None
-    }
+fn transform_key_action(action: Option<i32>) -> Option<f64> {
+    action.map(|v| C_FREQUENCY * HALFSTEP_EXP.powi(v))
 }
 
 fn main() -> Result<(), Error> {
@@ -37,16 +33,15 @@ fn main() -> Result<(), Error> {
 
     let mut gate = 0.0;
 
-    let synth = move |_t: f64, _dt: f64, _action: Option<KeyAction>| {
+    let synth = move |_t: f64, _dt: f64, _action: Option<i32>| {
         if let Some(new_freq) = transform_key_action(_action) {
             freq = new_freq;
         }
 
-        if let Some(KeyAction::Press(_)) = _action {
-            gate = 1.0;
-        } else if let Some(KeyAction::Release(_)) = _action {
-            gate = 0.0;
-        }
+        gate = match _action {
+            Some(_) => 1.0,
+            None => 0.0
+        };
 
         phase += freq * _dt * 2.0 * PI;
 
@@ -56,18 +51,16 @@ fn main() -> Result<(), Error> {
             phase_crossed_zero = true;
         }
 
-        let my_value = phase.sin();
+        let my_value = phase.sin() * gate;
 
         signal_buffer.push_back(my_value);
 
         if phase_crossed_zero {
-            sender.send((GraphEventType::SignalGraph,
-            signal_buffer.clone(),
-            4410));
+            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410));
             signal_buffer.clear();
         }
 
-        my_value * gate
+        my_value
     };
 
     audioengine.set_processor_function(Box::new(synth));
