@@ -28,8 +28,6 @@ for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: f
 `dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
 som representerer oscillatorens utgangssignal.
 
-Når du har fått til å lage en oscillator, kan du flytte oscillator-funksjonaliteten ut i en egen `struct`.
-
 ## 2. Visualisering av oscillatoren
 Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
 
