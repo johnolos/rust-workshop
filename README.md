@@ -28,6 +28,21 @@ for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: f
 `dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
 som representerer oscillatorens utgangssignal.
 
+<details><summary>Hint</summary>
+<p>
+A simple phase of an sine oscillation wave can be expressed by the following.
+```
+y(t) = A * sin(2 &#960; &#402; t &#43; &phi;), where A, &#402;, and &phi; are constant parameters.
+```
+</p>
+Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+And[here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+You're highly encouraged to implement another type of oscillating wave:
+- [Square wave](https://en.wikipedia.org/wiki/Square_wave)
+- [Triangle wave](https://en.wikipedia.org/wiki/Triangle_wave)
+- [Sawtooth wave](https://en.wikipedia.org/wiki/Sawtooth_wave)
+</details>
+
 ## 2. Visualisering av oscillatoren
 Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
 
