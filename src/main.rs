@@ -39,8 +39,8 @@ fn main() -> Result<(), Error> {
         }
 
         gate = match _action {
-            Some(_) => 1.0,
-            None => 0.0
+            Some(_) => f64::min(gate + 0.01, 1.0),
+            None => f64::max(gate - 0.01, 0.0)
         };
 
         phase += freq * _dt * 2.0 * PI;
