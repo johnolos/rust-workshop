@@ -24,7 +24,14 @@ fn main() -> Result<(), Error> {
 
     audioengine.set_processor_function(Box::new(synth));
 
-    let mut window = Ui::new("Synthesizer", [1280.0, 800.0], audioengine, None, None, None);
+    let mut window = Ui::new(
+        "Synthesizer",
+        [1280.0, 800.0],
+        audioengine,
+        None,
+        None,
+        None,
+    );
 
     window.show();
 

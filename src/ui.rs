@@ -189,18 +189,22 @@ impl<'a> Ui<'a> {
             // Check if we have incomming signal on reciever-channel and push it to our buffer
             for (event_type, signal_frame, size) in graphdata_rx_iter {
                 match event_type {
-                    GraphEventType::SignalGraph => for signal in signal_frame {
-                        signal_buffer.push_back(signal);
-                        while signal_buffer.len() > size {
-                            signal_buffer.pop_front();
+                    GraphEventType::SignalGraph => {
+                        for signal in signal_frame {
+                            signal_buffer.push_back(signal);
+                            while signal_buffer.len() > size {
+                                signal_buffer.pop_front();
+                            }
                         }
-                    },
-                    GraphEventType::FFTGraph => for signal in signal_frame {
-                        fft_buffer.push_back(signal);
-                        while fft_buffer.len() > size {
-                            fft_buffer.pop_front();
+                    }
+                    GraphEventType::FFTGraph => {
+                        for signal in signal_frame {
+                            fft_buffer.push_back(signal);
+                            while fft_buffer.len() > size {
+                                fft_buffer.pop_front();
+                            }
                         }
-                    },
+                    }
                 };
             }
 
@@ -261,7 +265,8 @@ impl<'a> Ui<'a> {
                 // signal plot
                 widget::PlotPath::new(0, signal_buffer.len(), -1.0, 1.0, |x| {
                     signal_buffer[x].max(-1.0).min(1.0)
-                }).w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
+                })
+                .w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
                 .middle_of(ids.signal_plot_background)
                 .color(conrod::color::DARK_BLUE)
                 .thickness(1.0)
@@ -270,7 +275,8 @@ impl<'a> Ui<'a> {
                 // fft plot
                 widget::PlotPath::new(0, fft_buffer.len(), 0.0, 2.0, |x| {
                     fft_buffer[x].max(0.0).min(2.0)
-                }).w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
+                })
+                .w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
                 .middle_of(ids.signal_plot_background)
                 .color(conrod::color::DARK_RED)
                 .thickness(1.0)
