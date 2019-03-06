@@ -28,15 +28,19 @@ for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: f
 `dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
 som representerer oscillatorens utgangssignal.
 
-<details><summary>Hint</summary>
-<p>
-A simple phase of an sine oscillation wave can be expressed by the following.
-```
+<details>
+<summary>Hint</summary>
+
+A sine oscillation wave can be expressed by the following.
+
 y(t) = A * sin(2 &#960; &#402; t &#43; &phi;), where A, &#402;, and &phi; are constant parameters.
-```
-</p>
+
+A = amplitude\
+&#402; = ordinary frequency. Try `440Hz`\
+&phi; = phase
+
 Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
-And[here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 You're highly encouraged to implement another type of oscillating wave:
 - [Square wave](https://en.wikipedia.org/wiki/Square_wave)
 - [Triangle wave](https://en.wikipedia.org/wiki/Triangle_wave)
