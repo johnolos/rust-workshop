@@ -41,6 +41,7 @@ A = amplitude\
 
 Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
 Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+
 You're highly encouraged to implement another type of oscillating wave:
 - [Square wave](https://en.wikipedia.org/wiki/Square_wave)
 - [Triangle wave](https://en.wikipedia.org/wiki/Triangle_wave)
