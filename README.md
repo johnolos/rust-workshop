@@ -98,55 +98,7 @@ Denne oppgaven går ut på å lage en forsterker-modul til vår synthesizer, som
 Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
 
 
-## 5. Refaktorering
-Nå som vi har fått på plass en enkel synthesizer, er det på tide å rydde litt opp i koden for videre utvikling.
-
-### Moduler
-I Rust deler man opp prosjektet sitt i moduler. Det er opp til utvikleren selv å definere hvilke typer, funksjoner og annet som skal eksponeres
-ut fra modulen, inkludert ting som er definert i underliggende moduler.
-
-Dessverre er Rust-communityet ikke så veldig flink til å forklare hvordan man _faktisk_ bruker moduler i praksis, og vi vil derfor
-gi en liten oppsummering her:
-
-#### Bruk av moduler
-Gitt at vi har en modul som heter `my_module`, med en submodul, `my_submodule`.
-
-For å importere modulen vår, skriver man `mod my_module;` øverst i filen som skal bruke modulen. Gitt at det finnes en
-funksjon `my_function()` definert i `my_module`, kan man nå kalle denne funksjonen slik: `my_module::my_function();`.
-
-For ergonomiens skyld ønsker man ofte å hente ut symboler fra denne modulen, slik at man heller kan skrive `my_function();`. Dette gjøres
-ved hjelp av `use`-deklarasjoner, slik som dette: `use my_module::my_function;`. Man kan bruke `use`-deklarasjoner globalt, eller innenfor et
-scope i koden.
-
-Både `mod`- og `use`-deklarasjoner støtter gruppering av symboler, slik: `use my_module::{my_function, my_other_function};`.
-
-For å eksponere submoduler ut fra en modul, må man deklarere submodulen som public: `pub mod my_submodule`.
-
-Man kan også eksponere symboler fra underliggende moduler direkte fra en modul på følgende måte: `pub use my_submodule::my_submodule_function;`.
-
-#### Filstruktur
-
-Vår modul kan defineres enten i en fil, `./my_module.rs`, eller i `mod.rs` i en underliggende mappe, slik som dette: `./my_module/mod.rs`. Vår
-submodul må plasseres i mappen `./my_module`, og kan selv defineres i enten `./my_module/my_submodule.rs` eller `./my_module/my_submodule/mod.rs`.
-
-(Kommentar: I Rust 2018 Edition kommer man ikke lenger til å bruke `mod.rs`-filer. Fra nå av vil alle moduler defineres som `my_module.rs`, og `my_submodule` vil fortsatt ligge som `my_module/my_submodule.rs`.)
-
-
-### Traits
-Rust støtter ikke arv av den typen som man finner i f.eks. Java, men man kan fortsatt implementere polymorfi på følgende måter i Rust:
-1. Enums. Det er slik mange standard-typer er definert, f.eks. `std::Option` (kan være `std::Option::Some(val)` eller `std::Option::None`).
-2. Traits. Grovt sett kan disses sammenlignes med interfaces i Java, men kan også inneholde standard-implementasjoner.
-
-### Oppgave
-I denne oppgaven skal du refaktorere koden din ved å dele opp koden i mindre moduler, og knytte disse sammen på en fornuftig måte. Du skal selv
-definere hva som er en fornuftig måte å gjøre dette på.
-
-Det mange av komponentene i synthesizeren kommer til å ha til felles, er at de har en funksjon `process(input: f64) -> f64`, som utfører
-signalprosesseringen i komponenten. Du har allrede implementert denne funksjonaliteten for både oscillatoren og forsterkeren, og det kan lett
-tenkes at enda flere komponenter kommer til å trenge samme funksjonalitet. Du skal derfor skille ut funksjonen `process(...)` fra disse
-komponentene til et eget trait `Processor`, og implementere dette traitet for begge disse komponentene.
-
-## 6. Envelope v/ADSR
+## 5. Envelope v/ADSR
 Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
 argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
 i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
@@ -184,7 +136,7 @@ synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilk
 I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
 felter for ADSR-en din til slidere i UI-et.
 
-## 7. The rest of the f*cking owl
+## 6. The rest of the f*cking owl
 Nå som du har en fungerende synthesizer, står du fritt til å utvikle synthesizeren videre slik du selv ønsker at den skal høres ut.
 
 Her er noen forslag til videre forbedringer:
