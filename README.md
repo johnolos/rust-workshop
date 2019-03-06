@@ -79,8 +79,12 @@ I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.r
 av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
 objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
 
-Et hint: Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
 
+<details>
+<summary>Hint</summary>
+
+Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
+</details>
 
 ## 3. Lag et `Keyboard`
 
@@ -106,6 +110,12 @@ og gir ut hvilken frekvens oscillatoren skal spille av.
 `synth(...)`-funksjonen hvor du implementerte oscillatoren i oppgave 1, tar inn et argument for hvilken knapp du har trykket på. Dette argumentet
 er av typen `KeyAction`, som er definert i `./audioengine/src/types.rs` -- ta en titt på denne typen for å finne ut hvordan den skal brukes.
 
+<details>
+<summary>Hint</summary>
+
+// Skriv hint her
+</details>
+
 ## 4. Implementere en forsterker og fullføre en minimal synthesizer
 Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
 vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
@@ -117,6 +127,12 @@ Denne oppgaven går ut på å lage en forsterker-modul til vår synthesizer, som
 
 Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
 
+
+<details>
+<summary>Hint</summary>
+
+// Skriv hint her
+</details>
 
 ## 5. Envelope v/ADSR
 Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
@@ -156,7 +172,14 @@ synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilk
 I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
 felter for ADSR-en din til slidere i UI-et.
 
-## 6. The rest of the f*cking owl
+
+<details>
+<summary>Hint</summary>
+
+// Skriv hint her
+</details>
+
+## 6. The rest of the f\*cking owl
 Nå som du har en fungerende synthesizer, står du fritt til å utvikle synthesizeren videre slik du selv ønsker at den skal høres ut.
 
 Her er noen forslag til videre forbedringer:
