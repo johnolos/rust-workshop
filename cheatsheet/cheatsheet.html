@@ -65,7 +65,7 @@ class: center, middle
 # Contents
 
 1. Basic syntax
-2. Variabler
+2. Variables
 3. Structs
 4. Enums
 5. Traits
@@ -77,7 +77,7 @@ class: center, middle
 11. clippy
 12. rustfmt
 13. rustfix
-14. Nyttige ressuers
+14. Resources
 
 ---
 name: code
@@ -88,14 +88,14 @@ template: code
 
 ###.top[.center[Basic syntax]]
 
-Klassisk "Hello, World" eksempel.
+A classic "Hello, World" example.
 ```rust
 fn main() {
   let s = "Hello, World";
   println!(s);
 }
 ```
-Husk at variabler er scoped og Rust har _move_-semantics.
+Remember Rust is scoped and has _move_-semantics.
 ```rust
 // hello is not valid here, it's not declared yet
 {
@@ -131,7 +131,7 @@ Immutable by default
 //    |     ^^^^^ cannot assign twice to immutable variable
 ```
 
-Bruk _mut_ for å fortelle rust at variabelen kan endres.
+Use _mut_ to allow mutation of an assigned variable.
 ```rust
 {
   let mut x = 5;
@@ -161,9 +161,9 @@ fn main() {
   println!("{:?}", e) // Employee { name: "Jon Snow", id: 230 }
 }
 ```
-<p class="mb">__#[derive(Debug)]__</p> brukes for å kunne printe innholdet i en struct. <br/>
+<p class="mb">__#[derive(Debug)]__</p> is used to print the contents of structs. <br/>
 
-<div>Merk at vi bruker <p class="mb">"{:?}"</p> for debug-print i stedet for vanligvis <p class="mb">"{}"</p>.</div>
+<div>We use <p class="mb">"{:?}"</p> to debug-println rather than <p class="mb">"{}"</p>.</div>
 ---
 template: code
 

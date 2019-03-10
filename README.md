@@ -28,7 +28,25 @@ for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: f
 `dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
 som representerer oscillatorens utgangssignal.
 
-Når du har fått til å lage en oscillator, kan du flytte oscillator-funksjonaliteten ut i en egen `struct`.
+<details>
+<summary>Hint</summary>
+
+A sine oscillation wave can be expressed by the following.
+
+y(t) = A * sin(2 &#960; &#402; t &#43; &phi;), where A, &#402;, and &phi; are constant parameters.
+
+A = amplitude\
+&#402; = ordinary frequency. Try `440Hz`\
+&phi; = phase
+
+Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+
+You're highly encouraged to implement another type of oscillating wave:
+- [Square wave](https://en.wikipedia.org/wiki/Square_wave)
+- [Triangle wave](https://en.wikipedia.org/wiki/Triangle_wave)
+- [Sawtooth wave](https://en.wikipedia.org/wiki/Sawtooth_wave)
+</details>
 
 ## 2. Visualisering av oscillatoren
 Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
@@ -61,8 +79,12 @@ I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.r
 av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
 objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
 
-Et hint: Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
 
+<details>
+<summary>Hint</summary>
+
+Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
+</details>
 
 ## 3. Lag et `Keyboard`
 
@@ -88,6 +110,12 @@ og gir ut hvilken frekvens oscillatoren skal spille av.
 `synth(...)`-funksjonen hvor du implementerte oscillatoren i oppgave 1, tar inn et argument for hvilken knapp du har trykket på. Dette argumentet
 er av typen `KeyAction`, som er definert i `./audioengine/src/types.rs` -- ta en titt på denne typen for å finne ut hvordan den skal brukes.
 
+<details>
+<summary>Hint</summary>
+
+// Skriv hint her
+</details>
+
 ## 4. Implementere en forsterker og fullføre en minimal synthesizer
 Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
 vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
@@ -100,55 +128,13 @@ Denne oppgaven går ut på å lage en forsterker-modul til vår synthesizer, som
 Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
 
 
-## 5. Refaktorering
-Nå som vi har fått på plass en enkel synthesizer, er det på tide å rydde litt opp i koden for videre utvikling.
+<details>
+<summary>Hint</summary>
 
-### Moduler
-I Rust deler man opp prosjektet sitt i moduler. Det er opp til utvikleren selv å definere hvilke typer, funksjoner og annet som skal eksponeres
-ut fra modulen, inkludert ting som er definert i underliggende moduler.
+// Skriv hint her
+</details>
 
-Dessverre er Rust-communityet ikke så veldig flink til å forklare hvordan man _faktisk_ bruker moduler i praksis, og vi vil derfor
-gi en liten oppsummering her:
-
-#### Bruk av moduler
-Gitt at vi har en modul som heter `my_module`, med en submodul, `my_submodule`.
-
-For å importere modulen vår, skriver man `mod my_module;` øverst i filen som skal bruke modulen. Gitt at det finnes en
-funksjon `my_function()` definert i `my_module`, kan man nå kalle denne funksjonen slik: `my_module::my_function();`.
-
-For ergonomiens skyld ønsker man ofte å hente ut symboler fra denne modulen, slik at man heller kan skrive `my_function();`. Dette gjøres
-ved hjelp av `use`-deklarasjoner, slik som dette: `use my_module::my_function;`. Man kan bruke `use`-deklarasjoner globalt, eller innenfor et
-scope i koden.
-
-Både `mod`- og `use`-deklarasjoner støtter gruppering av symboler, slik: `use my_module::{my_function, my_other_function};`.
-
-For å eksponere submoduler ut fra en modul, må man deklarere submodulen som public: `pub mod my_submodule`.
-
-Man kan også eksponere symboler fra underliggende moduler direkte fra en modul på følgende måte: `pub use my_submodule::my_submodule_function;`.
-
-#### Filstruktur
-
-Vår modul kan defineres enten i en fil, `./my_module.rs`, eller i `mod.rs` i en underliggende mappe, slik som dette: `./my_module/mod.rs`. Vår
-submodul må plasseres i mappen `./my_module`, og kan selv defineres i enten `./my_module/my_submodule.rs` eller `./my_module/my_submodule/mod.rs`.
-
-(Kommentar: I Rust 2018 Edition kommer man ikke lenger til å bruke `mod.rs`-filer. Fra nå av vil alle moduler defineres som `my_module.rs`, og `my_submodule` vil fortsatt ligge som `my_module/my_submodule.rs`.)
-
-
-### Traits
-Rust støtter ikke arv av den typen som man finner i f.eks. Java, men man kan fortsatt implementere polymorfi på følgende måter i Rust:
-1. Enums. Det er slik mange standard-typer er definert, f.eks. `std::Option` (kan være `std::Option::Some(val)` eller `std::Option::None`).
-2. Traits. Grovt sett kan disses sammenlignes med interfaces i Java, men kan også inneholde standard-implementasjoner.
-
-### Oppgave
-I denne oppgaven skal du refaktorere koden din ved å dele opp koden i mindre moduler, og knytte disse sammen på en fornuftig måte. Du skal selv
-definere hva som er en fornuftig måte å gjøre dette på.
-
-Det mange av komponentene i synthesizeren kommer til å ha til felles, er at de har en funksjon `process(input: f64) -> f64`, som utfører
-signalprosesseringen i komponenten. Du har allrede implementert denne funksjonaliteten for både oscillatoren og forsterkeren, og det kan lett
-tenkes at enda flere komponenter kommer til å trenge samme funksjonalitet. Du skal derfor skille ut funksjonen `process(...)` fra disse
-komponentene til et eget trait `Processor`, og implementere dette traitet for begge disse komponentene.
-
-## 6. Envelope v/ADSR
+## 5. Envelope v/ADSR
 Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
 argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
 i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
@@ -186,7 +172,14 @@ synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilk
 I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
 felter for ADSR-en din til slidere i UI-et.
 
-## 7. The rest of the f*cking owl
+
+<details>
+<summary>Hint</summary>
+
+// Skriv hint her
+</details>
+
+## 6. The rest of the f\*cking owl
 Nå som du har en fungerende synthesizer, står du fritt til å utvikle synthesizeren videre slik du selv ønsker at den skal høres ut.
 
 Her er noen forslag til videre forbedringer:
