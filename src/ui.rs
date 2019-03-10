@@ -2,7 +2,7 @@ extern crate conrod;
 
 use audioengine::types::SignalBuffer;
 //use audioengine::EngineController;
-use audioengine::CpalEngineController;
+use audioengine::EngineController;
 use event_loop;
 use std::path::Path;
 use std::sync::mpsc::Sender;
@@ -36,7 +36,7 @@ pub struct Ui<'a> {
     ids: Ids,
     sliders: &'a [Slider],
     renderer: conrod::backend::glium::Renderer,
-    audioengine: CpalEngineController,
+    audioengine: EngineController,
     slider_tx: Option<Sender<SliderEvent>>,
     graphdata_rx: Option<Receiver<GraphEvent>>,
     signal_buffer: SignalBuffer,
@@ -47,7 +47,7 @@ impl<'a> Ui<'a> {
     pub fn new(
         title: &str,
         dimensions: [f64; 2],
-        audioengine: CpalEngineController,
+        audioengine: EngineController,
         sliders: Option<&'a [Slider]>,
         slider_tx: Option<Sender<SliderEvent>>,
         graphdata_rx: Option<Receiver<GraphEvent>>,
