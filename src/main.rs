@@ -23,7 +23,8 @@ fn transform_key_action(action: Option<i32>) -> Option<f64> {
 }
 
 fn main() -> Result<(), Error> {
-    let audioengine = audioengine::EngineController::start();
+    //let audioengine = audioengine::EngineController::start();
+    let cpal_engine = audioengine::cpal_audioengine::CpalEngineController::start();
 
     let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
     let mut signal_buffer = SignalBuffer::new();
@@ -63,9 +64,9 @@ fn main() -> Result<(), Error> {
         my_value
     };
 
-    audioengine.set_processor_function(Box::new(synth));
+    cpal_engine.set_processor_function(Box::new(synth));
 
-    let mut window = Ui::new("Ljubljana", [1280.0, 800.0], audioengine, None, None, Some(receiver));
+    let mut window = Ui::new("Ljubljana", [1280.0, 800.0], cpal_engine, None, None, Some(receiver));
 
     window.show();
 

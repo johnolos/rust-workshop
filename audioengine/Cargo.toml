@@ -4,3 +4,4 @@ version = "0.1.0"
 
 [dependencies]
 portaudio = "0.7.0"
+cpal = "0.8.2"

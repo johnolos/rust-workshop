@@ -1,4 +1,5 @@
 extern crate portaudio;
+extern crate cpal;
 
 use portaudio::DeviceIndex;
 use portaudio as pa;
@@ -24,18 +25,13 @@ pub struct Engine {
 
 pub struct EngineController {
     pub engine: Engine,
-    pub output: pa::StreamParameters<f32>,
-    pub portaudio: pa::PortAudio
 }
 
 #[allow(dead_code)]
 impl EngineController {
     pub fn start() -> Self {
         let portaudio = pa::PortAudio::new().unwrap();
-        #[cfg(asio)]
-        let output = EngineController::asio_settings(&portaudio);
 
-        #[cfg(not(asio))]
         let output = EngineController::default_settings(&portaudio);
 
         let settings =
@@ -43,28 +39,7 @@ impl EngineController {
 
         EngineController {
             engine: Engine::start(settings, &portaudio),
-            output,
-            portaudio
         }
-    }
-
-    #[allow(dead_code)]
-    pub fn replace(
-        &mut self
-    ) {
-        self.stop();
-        let settings =
-            pa::OutputStreamSettings::new(self.output, SAMPLE_RATE, FRAME_SIZE);
-        self.engine = Engine::start(settings, &self.portaudio);
-    }
-
-    pub fn stop(&mut self) {
-        self.engine.stream.stop().unwrap();
-        println!("{:#?}", self.engine.stop_signal.send(true));
-    }
-
-    pub fn set_gain(&mut self, new_gain: f64) {
-        self.engine.gain_signal.send(new_gain).unwrap();
     }
 
     pub fn key_action(&mut self, action: KeyAction) {
@@ -73,17 +48,6 @@ impl EngineController {
 
     pub fn set_processor_function(&self, new_func: Box<FnMut(f64, f64, Option<i32>) -> f64>) {
         self.engine.signal_processor_change_sender.send(new_func).unwrap();
-    }
-
-    pub fn set_output_device(&mut self, output_device: DeviceIndex) {
-        let output_info = self.portaudio.device_info(output_device).unwrap();
-        let latency = output_info.default_low_output_latency;
-        self.output = pa::StreamParameters::<f32>::new(output_device, 2, true, latency);
-    }
-
-    pub fn set_input_device(&mut self, input_device: DeviceIndex) {
-        let input_info = self.portaudio.device_info(input_device).unwrap();
-        let latency = input_info.default_low_input_latency;
     }
 
     #[allow(dead_code)]
@@ -100,36 +64,6 @@ impl EngineController {
         output_params
     }
 
-    #[allow(dead_code)]
-    pub fn asio_settings(pa: &pa::PortAudio) -> pa::StreamParameters<f32> {
-        println!("Configuring portaudio with ASIO...");
-        let sample_rate = 44_100.0;
-        let frame_size = 128;
-
-        let asio_host_api = pa
-            .host_apis()
-            .find(|(_idx, host)| host.name == "ASIO")
-            .map(|(_idx, host)| host);
-
-        let output_device = asio_host_api
-            .clone()
-            .and_then(|api| api.default_output_device);
-        let output_info = output_device.and_then(|od| pa.device_info(od).ok());
-        let output_params = output_device
-            .iter()
-            .zip(output_info.iter())
-            .map(|(&od, oi)| {
-                pa::StreamParameters::<f32>::new(
-                    od,
-                    oi.max_output_channels,
-                    true,
-                    oi.default_low_input_latency,
-                )
-            })
-            .next();
-
-        output_params.unwrap()
-    }
 }
 
 impl Engine {
