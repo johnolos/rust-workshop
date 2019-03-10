@@ -1,27 +1,22 @@
-# Lag din egen syntesizer i Rust
+# Create your own syntesizer with Rust
 
-Formålet med workshopen er å lære litt om Rust, litt om lyd og forhåpenligvis ende opp med en syntesizer man kan bruke.
+The goal of this workshop is to learn a bit about Rust, a bit about sound, and hopefully end up with a playable syntesizer
 
-## Bygge og kjøre prosjektet
-Bygge: `cargo build`
-Kjøre: `cargo run`
+## Build and run the project
+Build: `cargo build`
+Run: `cargo run`
 
-_ Samt støtteverktøy hvis du installerte dette fra smoketesten _:
-Linting: `cargo clippy`
-Formattering: `cargo fmt`
-Auto-fiks: `cargo fix`
+# Tasks
 
+## 1. Create a simple oscillator
+An oscillator is a component that generates a periodic signal of a given frequency. There are different kinds of oscillators, but the most common are sine, sawtooth, square and triangle. Feel free to look these up.
 
-# Oppgavene
+In this task we are creating a simple oscillator. You are free to choose wich kind of periodic signal to use, but keep in mind that some signals sounds more dull than others. (Looking at you, sine wave).
 
-## 1. Lag en enkel oscillator
-En oscillator er en komponent som genererer et periodisk signal av en gitt frekvens. Det finnes ulike typer oscillatorer, men de mest brukte
-er av typene sinus, sagtann, firkant og trekant. Slå disse gjerne opp på nettet for å se hvordan disse signalene ser ut.
+Start by cloning the repo and and familiarize yourself with the code.
 
-I denne oppgaven skal du lage en enkel oscillator. Du kan selv velge hvilket periodisk signal som skal brukes for oscillatoren, men tenk på
-at ikke alle oscillatorer høres like "spennende" ut (looking at you, sine wave).
-
-Begynn med å klone `rust-workshop`, og forsøk å gjøre deg litt kjent med kildekoden.
+The whole synthesizer will be implemented within the closure function `synth` located in `./main.rs`. This function will be called by the audioprocessing thread for each new sample to be generated. The function takes one argument.
+`action` that is an Option of `i32`  
 
 Hele synthesizeren din skal defineres inne i closure-funksjonen `synth` i `./main.rs`. Denne funksjonen skal kalles av audioprosesseringstråden
 for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: funksjonens kjøretid, `t`; tid siden sist gang funksjonen ble kalt,
