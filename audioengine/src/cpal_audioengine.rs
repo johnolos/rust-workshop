@@ -40,22 +40,23 @@ fn start_audio_thread(
     signal_processor_change_receiver: Receiver<SignalProcessorFunction>,
 ) {
     std::thread::spawn(move || {
+        let mut key_action = None;
+        let mut keys_state = KeysState::new();
+        let mut audio_processor_function: Box<FnMut(f64, f64, Option<i32>) -> f64 + Send> =
+            Box::new(|duration, _, _| (duration * 440.0 * 2.0 * std::f64::consts::PI).sin());
+
         let device = cpal::default_output_device().expect("Failed to get default output device");
         let format = device
             .default_output_format()
             .expect("Failed to get default output format");
         let event_loop = cpal::EventLoop::new();
         let stream_id = event_loop.build_output_stream(&device, &format).unwrap();
-        event_loop.play_stream(stream_id.clone());
-
-        let mut key_action = None;
-        let mut keys_state = KeysState::new();
-        let mut audio_processor_function: Box<FnMut(f64, f64, Option<i32>) -> f64 + Send> =
-            Box::new(|duration, _, _| (duration * 440.0 * 2.0 * std::f64::consts::PI).sin());
 
         let sample_rate = format.sample_rate.0 as f32;
         let sample_time = (1.0 / sample_rate) as f64;
         let mut duration = 0.0;
+
+        event_loop.play_stream(stream_id.clone());
 
         event_loop.run(move |_, data| {
             for _new_processor in signal_processor_change_receiver.try_iter() {
