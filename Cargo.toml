@@ -9,7 +9,6 @@ winit = "0.18.1"
 glium = "0.22"
 ron = "0.4.0"
 serde = "*"
-portaudio = "0.7.0"
 find_folder = "0.3.0"
 rustfft = "*"
 audioengine = { path = "./audioengine" }
