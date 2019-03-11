@@ -76,13 +76,12 @@ The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
 
 ## 3. Create the keyboard
 
-### Sammenheng mellom toner og frekvenser
-`ISO 16` definerer at en `enstrøken A` skal ha en frekvens på _440.0 Hz_, og ut ifra denne frekvensen kan alle andre noter defineres.
-Å spille samme tone en oktav over, betyr i praksis en dobling av frekvens, uansett hvilken grunntone. Dette betyr altså at en `tostrøken A`
-har en frekvens på `440.0 * 2.0 = 880.0 Hz`, og en `trestrøken A` en frekvens på `880.0 * 2.0 = 1760.0 Hz`.
+### The realation between tones and frequencies
+`ISO 16` defines the musical note of `A above middle C` to have a frequency of _440.0 Hz_, and from this frequency, all other notes can be derived.     
 
-Det er tolv halvtoner i en oktav, og på grunn toner sin eksponensielle natur, betyr dette at det finnes et tall, `x`, som beskriver forholdet
-mellom alle halvtoner. Siden vi vet at å flytte en tone opp en oktav betyr en dobling av frekvens, kan vi bruke dette forholdet til å finne `x`:
+Playing an octave higher is the same as doubling the frequency played for any given tone. `440.0 * 2.0 = 880.0 Hz` is one octave up and `880.0 * 2.0 = 1760.0 Hz` is two octaves up from the `ISO 16-A`
+
+There are twelve notes in one octave, and due to the exponential nature of notes there is a number `x` that describes the relationship between them. Since we know that moving one octave up means doubling the frequency, we can use this to find `x`:
 
 ```
 1.0 * x * x * x * x * x * x * x * x * x * x * x * x = 2.0
@@ -91,27 +90,26 @@ x = 12th_root(2.0)
 x = 1.05946309436
 ```
 
-### Oppgave
-I denne oppgaven skal du lage en komponent som tar inn en heltallsverdi (hvilken knapp som er trykket ned, øker mot høyre på tastaturet),
-og gir ut hvilken frekvens oscillatoren skal spille av.
 
-`synth(...)`-funksjonen hvor du implementerte oscillatoren i oppgave 1, tar inn et argument for hvilken knapp du har trykket på. Dette argumentet
-er av typen `KeyAction`, som er definert i `./audioengine/src/types.rs` -- ta en titt på denne typen for å finne ut hvordan den skal brukes.
+### Task
+In this task we implement a function that takes the value of the `action` parameter which correspons to the key being pressed, and returns the frequency of the note to be played. If implemented correctly, you should be able to change the sound by pressing the two top letter rows on your keyboard.
+
+
 
 <details>
 <summary>Hint</summary>
 
-// Skriv hint her
 </details>
 
-## 4. Implementere en forsterker og fullføre en minimal synthesizer
+## 4. Implement an amplifier 
 Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
 vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
 når ingen knapper på tastaturet er trykket ned.
 
-### Oppgave
-Denne oppgaven går ut på å lage en forsterker-modul til vår synthesizer, som skal justere volumet på input-signalet etter en en gitt parameter,
-`gain`. Formelen som skal brukes for dette, er `output = input * gain`.
+### Task
+In this task we are creating an amplifier for our synth that will adjust the 
+volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
+
 
 Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
 
@@ -168,11 +166,10 @@ felter for ADSR-en din til slidere i UI-et.
 </details>
 
 ## 6. The rest of the f\*cking owl
-Nå som du har en fungerende synthesizer, står du fritt til å utvikle synthesizeren videre slik du selv ønsker at den skal høres ut.
+Now that you have a working synthesizer, you are free to develop it even further if you wish. Some suggestions:
 
-Her er noen forslag til videre forbedringer:
-- Filtre (lavpass, båndpass, høypass)
+- Filters (low pass, band pass and high pass)
 - Delay
-- Romklang
-- Flanger
+- Reverb
+- Flanging
 - Portamento
