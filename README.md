@@ -92,7 +92,7 @@ x = 1.05946309436
 
 
 ### Task
-In this task we implement a function that takes the value of the `action` parameter which correspons to the key being pressed, and returns the frequency of the note to be played. If implemented correctly, you should be able to change the sound by pressing the two top letter rows on your keyboard.
+In this task we implement a function that takes the value of the `action` parameter which correspons to the key being pressed, and returns the frequency of the note to be played. If implemented correctly, you should be able to change the sound by pressing the top two letter rows on your keyboard.
 
 
 
@@ -109,9 +109,6 @@ når ingen knapper på tastaturet er trykket ned.
 ### Task
 In this task we are creating an amplifier for our synth that will adjust the 
 volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
-
-
-Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
 
 
 <details>
