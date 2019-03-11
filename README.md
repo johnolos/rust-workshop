@@ -15,13 +15,9 @@ In this task we are creating a simple oscillator. You are free to choose wich ki
 
 Start by cloning the repo and and familiarize yourself with the code.
 
-The whole synthesizer will be implemented within the closure function `synth` located in `./main.rs`. This function will be called by the audioprocessing thread for each new sample to be generated. The function takes one argument.
-`action` that is an Option of `i32`  
+The whole synthesizer will be implemented within the closure function `synth` located in `./main.rs`. This function will be called by the audioprocessing thread for each new sample to be generated.
 
-Hele synthesizeren din skal defineres inne i closure-funksjonen `synth` i `./main.rs`. Denne funksjonen skal kalles av audioprosesseringstråden
-for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: funksjonens kjøretid, `t`; tid siden sist gang funksjonen ble kalt,
-`dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
-som representerer oscillatorens utgangssignal.
+The function takes one argument,`action`, that is an Option of `i32` which is a number from 0 to 15. This value corresponds to key currently being pressed. The `synth` function returns a value representing the oscillators output signal. _We will not need to worry about this argument until task three._
 
 <details>
 <summary>Hint</summary>
@@ -43,33 +39,30 @@ You're highly encouraged to implement another type of oscillating wave:
 - [Sawtooth wave](https://en.wikipedia.org/wiki/Sawtooth_wave)
 </details>
 
-## 2. Visualisering av oscillatoren
-Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
+## 2. Visualizing the oscillator
+Before we proceed with making a complete synthesizer, we wish to implement a graphical representation of the soundwaves we generate.
 
-### Litt teori: Kommunikasjon mellom tråder
-På grunn av strenge krav til behandlingstid for sanntidsaudio, kjører selve lydprosesseringsfunksjonen på en egen tråd adskilt fra
-UI-tråden. Vi blir derfor nødt å sende lydbølgen vi genererte i oppgave 1 over til UI-tråden, hvor den vil bli tegnet på skjermen.
+### Some theory: Communication between threads
+Since real time audio comes with some demands, the processing is done in a  thread separate from the UI-thread. Therefore, we need to communicate the generated sound wave to the UI-thread where it will be rendered on the screen.
 
-I mange språk foregår kommunikasjon mellom tråder i hovedsak vha begrensning av ressurs-tilgang, ofte implementert ved å bruke
-en låsetype kalt mutex (Mutual Exclusion). Dette vil si at man kun gir en tråd tilgang til å lese og modifisere en ressurs av gangen,
-og alle andre tråder må vente på tur. Applikasjoner som benytter seg av slike låser er ofte utsatt for problemer som data race,
-deadlock og starvation, og det er ofte vanskelig å luke ut disse problemene.
+In many languages the communication between threads are primarily done by limiting resource access, often by the use of mutexes. This limits the access to reading and modifying a resource to one thread at a time, making all other threads await their turn. Applications using this strategy often have problems with data races, deadlocks and starvation, and debugging these can be a challenge.
 
-I tillegg til mutexer, har Rust også støtte for kommunikasjon mellom tråder via kanaler. Å sende et signal via en kanal vil ikke blokkere
-senderen av signalet, noe som gjør at vi kan være mer trygg på at koden vår ikke kan forårsake data race -- mottakeren er den eneste
-som potensielt kan bli blokkert, men da kun ved visse kall (f.eks. vil receiver.recv() blokkere, mens receiver.try_recv() ikke).
+In addition to mutexes, Rust supports communication between threads via 
+channels. Sending a signal through a channel will not block the sender, and only some calls will block the reciever. 
 
-Nedenfor kan en se et eksempel for hvordan å opprette en kanal som sender data av typen `MyChannelType` over en kanal.
+Bellow, we see an example of how to create channel that sends data of the type `MyChannelType`.
 
 ```rust
 use std::sync::mpsc::channel;
 (my_sender, my_receiver) = channel::<MyChannelType>();
 ```
 
-Husk på at ved å bruke kanaler, så må man fortsatt forholde seg til Rust sine strenge krav til eierskap: Ved å sende en variabel over en kanal,
-gir man også fra seg eierskapet til variabelen.
+Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
-### Oppgave
+### Task
+In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectivly. You must also find out how to create an instance of `GraphEvent`
+
+
 I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
 av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
 objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
@@ -78,10 +71,10 @@ objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
 <details>
 <summary>Hint</summary>
 
-Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
+The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
 </details>
 
-## 3. Lag et `Keyboard`
+## 3. Create the keyboard
 
 ### Sammenheng mellom toner og frekvenser
 `ISO 16` definerer at en `enstrøken A` skal ha en frekvens på _440.0 Hz_, og ut ifra denne frekvensen kan alle andre noter defineres.
