@@ -73,11 +73,12 @@ class: center, middle
 7. Pattern-matching
 8. Ownership
 9. References
-10. Threads and channels
-11. clippy
-12. rustfmt
-13. rustfix
-14. Resources
+10. Closures
+11. Threads and channels
+12. clippy
+13. rustfmt
+14. rustfix
+15. Resources
 
 ---
 name: code
@@ -113,7 +114,7 @@ println!("{}", hello);
 ---
 template: code
 
-###.top[.center[Variabler]]
+###.top[.center[Variables]]
 
 Immutable by default
 ```rust
@@ -201,14 +202,15 @@ template: code
 
 ```rust
 trait Animal {
-  // Statically method signature; Self refers to the type being implemented for.
+  // Statically method signature;
+  // Self refers to the type being implemented for.
   fn new(name: &'static str) -> Self;
 
   // Method signatures for the instance
   fn name(&self) -> &'static str;
   fn noise(&self) -> &'static str;
 
-  // Traits can define default implementation
+  // Traits can define a default implementation
   fn talk(&self) {
       println!("{} says {}", self.name(), self.noise());
   }
@@ -241,9 +243,9 @@ impl Animal for Sheep {
 
     fn noise(&self) -> &'static str {...}
 
-    // Default implementation overridden
+    // default implementation overridden
     fn talk(&self) {
-      // Another implementation
+      // another implementation
     }
 }
 ```
@@ -297,13 +299,12 @@ template: code
 
 ###.top[.center[Ownership]]
 
-Rust har tre enkle regler til eierskap:
-- Enhver verdi i Rust har en variabel som forteller hvem som eier den.
-- Det finnes bare en eier til enhver tid.
-- Når eieren ikke finnes i scope lengere, så vil verdien deallokeres eller droppes.
+Rust has the following three rules for ownership:
+- Each value in Rust has a variable that’s called its owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
 
-Enten én eller flere referanser <u>**eller**</u> én muterende referanse.
-
+Furthermore, you can only have either one or more references, **or**, one mutating reference.
 
 ```rust
 // hello is not valid here, it's not declared yet
@@ -312,7 +313,7 @@ Enten én eller flere referanser <u>**eller**</u> én muterende referanse.
   let hello = "world";
   // do something with hello
 }
-// this scope is over, and therefore hello is no longer valid
+// this scope is over, and therefore hello is no longer valid.
 
 println!("{}", hello);
 //  9 |     println!("{}", hello)
@@ -349,6 +350,19 @@ fn main() {
   // TransferApi { api_key: "secret_api_key" }
 }
 ```
+---
+template: code
+
+###.top[.center[Closures]]
+
+```rust
+let expensive_closure = |num: u32| -> u32 {
+    println!("calculating slowly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+};
+```
+The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
 
 ---
 template: code
@@ -386,16 +400,16 @@ template: code
 
 ###.top[.center[clippy (recommended)]]
 
-__clippy__ hjelper deg med å fange vanlige programmeringsfeil i rust.
+__clippy__ helps you catch common mistakes in Rust, whether it is a linting error or common code mistake.
 
-### Intallering
+### Installation
 
 ```bash
 $ rustup component add clippy-preview
 ```
 
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo clippy
@@ -406,16 +420,16 @@ template: code
 
 ###.top[.center[rustfmt (optional)]]
 
-__rustfmt__ formaterer rust-koden din til ett sett med standardregler.
+__rustfmt__ formats your code following a set of standardized rules.
 
-### Intallering
+### Installation
 
 ```bash
 $ rustup component add rustfmt-preview
 ```
 
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo fmt
@@ -426,32 +440,32 @@ template: code
 
 ###.top[.center[rustfix (optional)]]
 
-__rustfix__ utfører forslag som rust-kompilatoren foreslår.
+__rustfix__ automatically applies the suggestions the __rustc__-compiler suggests.
 
-Verktøyet er veldig nytt og gir ikke alt for mye nytteverdi, men verdt å nevne.
+As a tooling, __rustfix__, is certainly on the newer side of things. However, it is worthy of a mention.
 
-### Intallering
+### Installation
 
 ```bash
 $ cargo install cargo-fix
 ```
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo fix
 ```
 
 ---
+###.top[.center[Useful resources]]
 
-# Nyttige ressuser
+Online Book: [__Rust by example__](https://doc.rust-lang.org/stable/rust-by-example/)
 
-* [https://doc.rust-lang.org/stable/rust-by-example/](https://doc.rust-lang.org/stable/rust-by-example/)
+__Rust by example__ is a online introductory book for Rust where, as the name suggests,
+teach you by showing you examples. In fact, some of them you have already seen in this cheatsheet.
 
-
-Endel av eksemplene i denne presentasjonen er hetet fra samme bok.
-
-Anbefales å lese utdrag fra den boken skulle man stå fast.
+It is highly encouraged to seek out help, or put your mind at rest by reading some of the chapter.
+Perhaps the chapter about ownerships?
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
