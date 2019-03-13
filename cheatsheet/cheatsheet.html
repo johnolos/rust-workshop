@@ -400,8 +400,9 @@ template: code
 ###.top[.center[Closures]]
 
 ```rust
-let expensive_closure = |num: u32| -> u32 {
-    println!("calculating slowly...");
+let message = "calculating slowly...";
+let expensive_closure = move |num: u32| -> u32 {
+    println!("{}", message);
     thread::sleep(Duration::from_secs(2));
     num
 };
@@ -409,6 +410,8 @@ let expensive_closure = |num: u32| -> u32 {
 let expensive_result = expensive_closure(2);
 ```
 The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
+
+The `move` keyword in the closure definition is used to tell the compiler that it will take ownership of the variable `message` in the parent scope.
 
 ---
 template: code
