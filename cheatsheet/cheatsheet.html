@@ -68,17 +68,21 @@ class: center, middle
 2. Variables
 3. Structs
 4. Enums
-5. Traits
-6. Impl
-7. Pattern-matching
-8. Ownership
-9. References
-10. Closures
-11. Threads and channels
-12. clippy
-13. rustfmt
-14. rustfix
-15. Resources
+5. if let
+6. Traits
+7. Impl
+8. Pattern-matching
+9. Ownership
+10. Moved values
+11. Moved values (Copy)
+12. Moved values (Clone)
+13. References
+14. Closures
+15. Threads and channels
+16. clippy
+17. rustfmt
+18. rustfix
+19. Resources
 
 ---
 name: code
@@ -192,6 +196,20 @@ enum Result<T, E> {
 enum Option<T> {
   Some(T),
   None
+}
+
+---
+```
+template: code
+# if let
+
+```rust
+let wrapped_integer = Some(7);
+
+// The _if let_ construct reads: _if let destructures wrapped_integer into
+// Some(number), evaluate the block ({}).
+if let Some(number) = wrapped_integer {
+    println!("{}", number); // 7
 }
 ```
 
@@ -318,6 +336,48 @@ Furthermore, you can only have either one or more references, **or**, one mutati
 println!("{}", hello);
 //  9 |     println!("{}", hello)
 //    |                    ^^^^^ not found in this scope
+```
+
+---
+###.top[.center[Moved values]]
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+
+println!("{}, world!", s1);
+```
+
+```bash
+error[E0382]: use of moved value: s1
+ --> src/main.rs:5:28
+  |
+3 |     let s2 = s1;
+  |         -- value moved here
+4 |
+5 |     println!("{}, world!", s1);
+  |                            ^^ value used here after move
+  |
+  = note: move occurs because s1 has type std::string::String, which does
+  not implement the Copy trait
+```
+---
+###.top[.center[Moved values (Copy)]]
+
+```rust
+let x = 5;
+let y = x;
+println!("{}", x); // 5
+```
+
+---
+###.top[.center[Moved values (Clone)]]
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1.clone();
+
+println!("s1 = {}, s2 = {}", s1, s2);
 ```
 
 ---
