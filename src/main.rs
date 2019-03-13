@@ -17,9 +17,14 @@ use std::f64::consts::PI;
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
+    let sample_rate = audioengine.sample_rate;
+    let time_per_sample = 1.0 / sample_rate;
+
+    let mut phase = 0.0;
+
     let mut current_key = None;
     let synth = move |action: Option<i32>| {
-        if _action != current_key {
+        if action != current_key {
             current_key = action;
 
             println!("{:?}", action);

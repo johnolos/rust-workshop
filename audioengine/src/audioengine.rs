@@ -7,6 +7,7 @@ use types::{KeyAction, SignalProcessorFunction};
 pub struct EngineController {
     key_action_sender: Sender<KeyAction>,
     signal_processor_change_sender: Sender<SignalProcessorFunction>,
+    pub sample_rate: f64
 }
 
 impl EngineController {
@@ -15,11 +16,12 @@ impl EngineController {
         let (signal_processor_change_sender, signal_processor_change_receiver) =
             channel::<SignalProcessorFunction>();
 
-        start_audio_thread(key_action_receiver, signal_processor_change_receiver);
+        let sample_rate = start_audio_thread(key_action_receiver, signal_processor_change_receiver);
 
         Self {
             key_action_sender,
             signal_processor_change_sender,
+            sample_rate
         }
     }
 
@@ -38,17 +40,20 @@ impl EngineController {
 fn start_audio_thread(
     key_action_receiver: Receiver<KeyAction>,
     signal_processor_change_receiver: Receiver<SignalProcessorFunction>,
-) {
+) -> f64 {
+    let device = cpal::default_output_device().expect("Failed to get default output device");
+    let format = device
+        .default_output_format()
+        .expect("Failed to get default output format");
+
+    let sample_rate = f64::from(format.sample_rate.0);
+
     std::thread::spawn(move || {
         let mut key_action = None;
         let mut keys_state = KeysState::new();
         let mut audio_processor_function: Box<FnMut(Option<i32>) -> f64 + Send> =
             Box::new(|_| 0.0);
 
-        let device = cpal::default_output_device().expect("Failed to get default output device");
-        let format = device
-            .default_output_format()
-            .expect("Failed to get default output format");
         let event_loop = cpal::EventLoop::new();
         let stream_id = event_loop.build_output_stream(&device, &format).unwrap();
 
@@ -112,4 +117,6 @@ fn start_audio_thread(
             }
         });
     });
+
+    sample_rate
 }
