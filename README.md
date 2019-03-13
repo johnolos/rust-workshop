@@ -121,22 +121,11 @@ The amp can be implemented as a function, or right into the synth-function.
 Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. 
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. Study the following figures.
 
-![State diagram for ADSR](adsr-state-machine.png)
+![State diagram for ADSR](images/adsr-state-machine.png)
+![Envelope](images/Envelope.png)
 
-En ADSR (Attack, Decay, Sustain, Release) transformerer en gate-input til et mer dynamisk signal. For å utføre dette inneholder den en intern
-tilstandsmaskin som har tilstandende `Attack`, `Decay`, `Sustain`, `Release` og `Off`, og hvor hendelsesforløpet er som følger:
-0. (ADSR er i tilstand `Off`, med output = 0.0)
-1. `gate` går fra 0.0 til 1.0. ADSR går til tilstand `Attack`.
-2. ADSR øker output med en konfigurerbar verdi `self.attack` hver gang `process()` blir kjørt.
-3. Output når 1.0. ADSR går til tilstand `Decay`.
-4. Output minker med en konfigurerbar verdi `self.decay` hver gang `process()` blir kjørt.
-5. Output når konfigurerbar verdi `self.sustain`. ADSR går til tilstand Sustain.
-6. Output holder verdien `self.sustain` for hver gang `process()` kalles, så lenge `gate` holdes på 1.0.
-7. `gate` går fra 1.0 til 0.0. ADSR går til tilstand `Release`.
-8. Output minker med en konfigurerbar verdi `self.release` hver gang `process()` blir kjørt.
-9. Output når 0.0. ADSR går til tilstand `Off`.
 
 ### Vising av slidere i UI-et
 UI-et vi har satt opp for denne workshopen er i stand til å vise slidere som man kan bruke for å justere på parametre. Du står fri til å
