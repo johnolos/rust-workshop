@@ -30,7 +30,7 @@ A = amplitude\
 &#402; = ordinary frequency. Try `440Hz`\
 &phi; = phase
 
-Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+The sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
 Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 
 You're highly encouraged to implement another type of oscillating wave:
@@ -63,11 +63,6 @@ Remember that when using channels, one is still bound by the ownership rules of 
 In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
 
 For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
-
-I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
-av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
-objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
-
 
 <details>
 <summary>Hint</summary>
