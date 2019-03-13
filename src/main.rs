@@ -8,7 +8,10 @@ mod event_loop;
 mod types;
 mod ui;
 
+#[allow(unused_imports)]
 use audioengine::types::KeyAction;
+
+#[allow(unused_imports)]
 use ui::Ui;
 
 #[allow(unused_imports)]
@@ -22,7 +25,6 @@ fn main() -> Result<(), Error> {
     let time_per_sample = 1.0 / sample_rate;
 
     let mut time = 0.0;
-    let mut phase = 0.0;
 
     let synth = move |action: Option<i32>| {
         time += time_per_sample;
