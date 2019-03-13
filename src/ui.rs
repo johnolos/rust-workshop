@@ -5,7 +5,7 @@ use audioengine::EngineController;
 use event_loop;
 use std::path::Path;
 use std::sync::mpsc::Sender;
-use types::{GraphEvent, GraphEventType, Slider, SliderEvent};
+use types::{Slider, SliderEvent};
 
 use conrod::color;
 use std::sync::mpsc::Receiver;
@@ -37,7 +37,7 @@ pub struct Ui<'a> {
     renderer: conrod::backend::glium::Renderer,
     audioengine: EngineController,
     slider_tx: Option<Sender<SliderEvent>>,
-    graphdata_rx: Option<Receiver<GraphEvent>>,
+    graphdata_rx: Option<Receiver<Vec<f64>>>,
     signal_buffer: SignalBuffer,
     fft_buffer: SignalBuffer,
 }
@@ -49,7 +49,7 @@ impl<'a> Ui<'a> {
         audioengine: EngineController,
         sliders: Option<&'a [Slider]>,
         slider_tx: Option<Sender<SliderEvent>>,
-        graphdata_rx: Option<Receiver<GraphEvent>>,
+        graphdata_rx: Option<Receiver<Vec<f64>>>,
     ) -> Self {
         let signal_buffer: SignalBuffer = (0..2048).map(|_| 0.0).collect();
         let fft_buffer: SignalBuffer = (0..2048).map(|_| 0.0).collect();
@@ -187,25 +187,13 @@ impl<'a> Ui<'a> {
             let graphdata_rx_iter = graphdata_rx.iter().flat_map(|x| x.try_iter());
 
             // Check if we have incomming signal on reciever-channel and push it to our buffer
-            for (event_type, signal_frame, size) in graphdata_rx_iter {
-                match event_type {
-                    GraphEventType::SignalGraph => {
-                        for signal in signal_frame {
-                            signal_buffer.push_back(signal);
-                            while signal_buffer.len() > size {
-                                signal_buffer.pop_front();
-                            }
-                        }
+            for signal_frame in graphdata_rx_iter {
+                for signal in signal_frame {
+                    signal_buffer.push_back(signal);
+                    while signal_buffer.len() > 4410 {
+                        signal_buffer.pop_front();
                     }
-                    GraphEventType::FFTGraph => {
-                        for signal in signal_frame {
-                            fft_buffer.push_back(signal);
-                            while fft_buffer.len() > size {
-                                fft_buffer.pop_front();
-                            }
-                        }
-                    }
-                };
+                }
             }
 
             // Draw the widgets
