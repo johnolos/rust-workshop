@@ -102,19 +102,19 @@ In this task we implement a function that takes the value of the `action` parame
 </details>
 
 ## 4. Implement an amplifier 
-Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
-vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
-når ingen knapper på tastaturet er trykket ned.
+By now we have an oscillator that generates sound, and a keyboard that can be used to change the tone. But notice how the tone plays, even when the keyboard is not pressed.
 
 ### Task
 In this task we are creating an amplifier for our synth that will adjust the 
 volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
 
+In the case where no key is pressed, the value of `gain` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. See if you can figure out a way to ease into the full output.
+
 
 <details>
 <summary>Hint</summary>
 
-// Skriv hint her
+The amp can be implemented as a function, or right into the synth-function. In order to ease in we need to keep track of what the `gain`value was the last time the function was called, and increment it gradualy.
 </details>
 
 ## 5. Envelope v/ADSR
