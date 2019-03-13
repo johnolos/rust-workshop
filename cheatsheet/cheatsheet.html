@@ -99,21 +99,6 @@ fn main() {
   println!(s);
 }
 ```
-Remember Rust is scoped and has _move_-semantics.
-```rust
-// hello is not valid here, it's not declared yet
-{
-  // hello is valid from this point forward
-  let hello = "world";
-  // do something with hello
-}
-// this scope is over, and therefore hello is no longer valid
-
-
-println!("{}", hello);
-//  9 |     println!("{}", hello)
-//    |                    ^^^^^ not found in this scope
-```
 ---
 template: code
 
