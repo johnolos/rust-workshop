@@ -117,7 +117,7 @@ The amp can be implemented as a function, or right into the synth-function.
 Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. Study the following figures.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, and `Release`. Study the following figures.
 
 ![State diagram for ADSR](images/adsr-state-machine.png)
 (Value refers to the output of the ADSR)
