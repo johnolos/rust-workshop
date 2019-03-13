@@ -20,10 +20,12 @@ fn main() -> Result<(), Error> {
     let sample_rate = audioengine.sample_rate;
     let time_per_sample = 1.0 / sample_rate;
 
+    let mut time = 0.0;
     let mut phase = 0.0;
 
     let mut current_key = None;
     let synth = move |action: Option<i32>| {
+        time += time_per_sample;
         if action != current_key {
             current_key = action;
 
