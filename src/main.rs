@@ -49,7 +49,7 @@ fn main() -> Result<(), Error> {
         signal_buffer.push_back(my_value);
 
         if phase_crossed_zero {
-            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410));
+            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410)).expect("Unable to send graph data to UI.");
             signal_buffer.clear();
         }
 
