@@ -30,7 +30,7 @@ A = amplitude\
 &#402; = ordinary frequency. Try `440Hz`\
 &phi; = phase
 
-Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+The sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
 Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 
 You're highly encouraged to implement another type of oscillating wave:
@@ -117,43 +117,40 @@ The amp can be implemented as a function, or right into the synth-function.
 Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. Study the following figures.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, and `Release`. Study the following figures.
 
 ![State diagram for ADSR](images/adsr-state-machine.png)
+(Value refers to the output of the ADSR)
 ![Envelope](images/Envelope.png)
 
-We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state.
+We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state. The output of the ADSR is multiplied with the audio signal.
 
 
-### Vising av slidere i UI-et
-UI-et vi har satt opp for denne workshopen er i stand til å vise slidere som man kan bruke for å justere på parametre. Du står fri til å
-velge hvor mange slidere du ønsker, hvilken range de skal ha, default-verdi og hvilken tekst som skal stå under slideren.
+### Sliders in the UI
 
-For å vise slidere i UI-et, må du definere opp et array av `Slider`-e og sende dem inn som parameter i `Ui::new(...)`. Ta en titt i
-`./types.rs` for å se hvordan man kan lage instanser av denne typen.
+The UI we are using is capeable of showing sliders that can be used to adjust parameters. You are free to implement sliders of your own choosing, their range, default value and label text.
 
-Parameteren til `Ui::new(...)` for slidere har signatur `Option<&[Slider]>`, så her må du pakke inn slider-arrayet ditt i en `Some`.
+To show sliders in the UI, you must define an array of `Slider` and send them along as a parameter in `Ui::new(...)` in `main.rs`. Take a look in `./types.rs` to see how this type is instantiated.
 
-Dersom du nå prøver å kjøre programmet, vil du kunne se at dine slidere blir tegnet på skjermen, men det er foreløpig ikke koblet opp
-noen logikk til disse.
+If you now run our program, you will see that your sliders are drawn on the screen, but they are currntly not wired up.
 
-På samme måte som du brukte kanaler for å sende lyddata til UI-tråden i oppgave 2, må du her sende sliderdata fra UI-tråden tilbake til
-synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilken type kanalen din må ha.
+Similarily to the way we used channels to send sound data to the UI-thread in task 2, you now have to send slider-data from the UI-thread back to the synthesizer. Look in the parameter-list of `Ui::new(...)` to find out what type your channel must have.
 
 ### Task
 
 In this task we implement the ADSR component that will be hooked in between the gate value and the output of the synth. We will then add adjustable sliders for the ADSR-values.
 
-I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
-felter for ADSR-en din til slidere i UI-et.
-
-
 <details>
 <summary>Hint</summary>
+Remember that the output value from the ADSR is multiplied with the audio signal.
+
+The ADSR values in the state diagram can be thought of the duration of the state. A higher `attack` value vil give a longer ramp up.
+
+The sliders-parameter in `Ui::new(...)` has signature `Option<&[Slider]>`, so you will have to wrap the array in a `Some`.
 
 </details>
 
-## 6. The rest of the f\*cking owl
+## 6. [The rest of the f\*cking owl](https://imgur.com/gallery/nCec3EU)
 Now that you have a working synthesizer, you are free to develop it even further if you wish. Some suggestions:
 
 - Filters (low pass, band pass and high pass)
