@@ -54,7 +54,12 @@ fn main() -> Result<(), Error> {
             phase_crossed_zero = true;
         }
 
-        let my_value = phase.sin();
+        let gate = match action {
+            Some(_) => 1.0,
+            None => 0.0
+        };
+
+        let my_value = phase.sin() * gate;
 
         signal_buffer.push_back(my_value);
 
