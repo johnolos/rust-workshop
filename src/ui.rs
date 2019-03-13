@@ -1,6 +1,5 @@
 extern crate conrod;
 
-use audioengine::types::SignalBuffer;
 use audioengine::EngineController;
 use event_loop;
 use std::path::Path;
