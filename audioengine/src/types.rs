@@ -12,4 +12,4 @@ pub enum KeyAction {
 }
 
 pub type SignalFrame = Vec<Signal>;
-pub type SignalBuffer = VecDeque<Signal>;
+pub type SignalBuffer = Vec<Signal>;
