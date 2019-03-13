@@ -18,6 +18,7 @@ use ui::Ui;
 
 #[allow(unused_imports)]
 use std::f64::consts::PI;
+use types::{Slider, SliderEvent, SliderEventType};
 
 const C_FREQUENCY: f64 = 261.63;
 const HALFSTEP_EXP: f64 = 1.059_463_094_36;
@@ -84,6 +85,7 @@ fn main() -> Result<(), Error> {
     let mut adsr = ADSR::new();
 
     let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
+    let (slider_tx, slider_rx) = std::sync::mpsc::channel::<SliderEvent>();
     let mut signal_buffer = SignalBuffer::new();
 
     let synth = move |action: Option<i32>| {
@@ -105,6 +107,15 @@ fn main() -> Result<(), Error> {
             None => 0.0
         };
 
+        for (event_type, value) in slider_rx.try_iter() {
+            match event_type {
+                SliderEventType::Attack => adsr.attack = value,
+                SliderEventType::Decay => adsr.decay = value,
+                SliderEventType::Sustain => adsr.sustain = value,
+                SliderEventType::Release => adsr.release = value
+            }
+        }
+
         let my_value = phase.sin() * adsr.process(gate);
 
         signal_buffer.push_back(my_value);
@@ -119,12 +130,21 @@ fn main() -> Result<(), Error> {
 
     audioengine.set_processor_function(Box::new(synth));
 
+    let sliders = [
+        Slider::new(1.0, 10000.0, 10.0, SliderEventType::Attack, "Attack"),
+        Slider::new(1.0, 10000.0, 10.0, SliderEventType::Decay, "Decay"),
+        Slider::new(0.0, 1.0, 0.5, SliderEventType::Sustain, "Sustain"),
+        Slider::new(1.0, 10000.0, 10.0, SliderEventType::Release, "Release"),
+    ];
+
+    let attack_slider = Slider::new(0.0, 100.0, 50.0, SliderEventType::Attack, "Attack");
+
     let mut window = Ui::new(
         "Synthesizer",
         [1280.0, 800.0],
         audioengine,
-        None,
-        None,
+        Some(&sliders),
+        Some(slider_tx),
         Some(receiver),
     );
 
