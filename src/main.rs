@@ -11,8 +11,6 @@ mod ui;
 #[allow(unused_imports)]
 use audioengine::types::{KeyAction, SignalBuffer};
 
-use types::{GraphEvent, GraphEventType};
-
 #[allow(unused_imports)]
 use ui::Ui;
 
@@ -29,7 +27,7 @@ fn main() -> Result<(), Error> {
     let mut time = 0.0;
     let mut phase = 0.0;
 
-    let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
+    let (sender, receiver) = std::sync::mpsc::channel::<SignalBuffer>();
     let mut signal_buffer = SignalBuffer::new();
 
     let synth = move |action: Option<i32>| {
@@ -46,10 +44,10 @@ fn main() -> Result<(), Error> {
 
         let my_value = phase.sin();
 
-        signal_buffer.push_back(my_value);
+        signal_buffer.push(my_value);
 
         if phase_crossed_zero {
-            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410)).expect("Unable to send graph data to UI.");
+            sender.send(signal_buffer.clone()).expect("Unable to send graph data to UI.");
             signal_buffer.clear();
         }
 
