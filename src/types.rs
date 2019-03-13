@@ -1,4 +1,3 @@
-use audioengine::types::SignalBuffer;
 
 #[allow(dead_code)]
 pub struct Slider {
@@ -33,12 +32,3 @@ pub enum SliderEventType {
 
 #[allow(dead_code)]
 pub type SliderEvent = (SliderEventType, f64);
-
-#[allow(dead_code)]
-pub enum GraphEventType {
-    SignalGraph,
-    FFTGraph,
-}
-
-#[allow(dead_code)]
-pub type GraphEvent = (GraphEventType, SignalBuffer, usize);
