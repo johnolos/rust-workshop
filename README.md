@@ -108,21 +108,23 @@ By now we have an oscillator that generates sound, and a keyboard that can be us
 In this task we are creating an amplifier for our synth that will adjust the 
 volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
 
-In the case where no key is pressed, the value of `gain` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. See if you can figure out a way to ease into the full output.
+In the case where no key is pressed, the value of `gain` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. We will address this in task 5.
 
 
 <details>
 <summary>Hint</summary>
 
-The amp can be implemented as a function, or right into the synth-function. In order to ease in we need to keep track of what the `gain`value was the last time the function was called, and increment it gradualy.
+The amp can be implemented as a function, or right into the synth-function.
 </details>
 
 ## 5. Envelope v/ADSR
-Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
-argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
-i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
+Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. 
+
+![State diagram for ADSR](adsr-state-machine.png)
+
 En ADSR (Attack, Decay, Sustain, Release) transformerer en gate-input til et mer dynamisk signal. For å utføre dette inneholder den en intern
 tilstandsmaskin som har tilstandende `Attack`, `Decay`, `Sustain`, `Release` og `Off`, og hvor hendelsesforløpet er som følger:
 0. (ADSR er i tilstand `Off`, med output = 0.0)
