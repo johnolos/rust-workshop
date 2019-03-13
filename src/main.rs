@@ -8,59 +8,47 @@ mod event_loop;
 mod types;
 mod ui;
 
-use audioengine::types::{KeyAction, SignalBuffer};
-use types::{GraphEvent, GraphEventType};
+#[allow(unused_imports)]
+use audioengine::types::KeyAction;
+
+#[allow(unused_imports)]
 use ui::Ui;
 
 #[allow(unused_imports)]
 use std::f64::consts::PI;
 
-const C_FREQUENCY: f64 = 261.63;
-const HALFSTEP_EXP: f64 = 1.059_463_094_36;
-
-fn transform_key_action(action: Option<i32>) -> Option<f64> {
-    action.map(|v| C_FREQUENCY * HALFSTEP_EXP.powi(v))
-}
-
+#[allow(unused_variables)]
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
-    let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
-    let mut signal_buffer = SignalBuffer::new();
+    let sample_rate = audioengine.sample_rate;
+    let time_per_sample = 1.0 / sample_rate;
 
-    let mut phase = 0.0;
-    let mut freq = 220.0;
+    let mut time = 0.0;
 
-    let mut gate = 0.0;
+    let mut current_key = None;
+    let synth = move |action: Option<i32>| {
+        time += time_per_sample;
+        if action != current_key {
+            current_key = action;
 
-    let synth = move |_t: f64, _dt: f64, _action: Option<i32>| {
-        if let Some(new_freq) = transform_key_action(_action) {
-            freq = new_freq;
+            println!("{:?}", action);
         }
-
-        phase += freq * _dt * 2.0 * PI;
-
-        let mut phase_crossed_zero = false;
-        if phase > PI {
-            phase -= 2.0 * PI;
-            phase_crossed_zero = true;
-        }
-
-        let my_value = phase.sin();
-
-        signal_buffer.push_back(my_value);
-
-        if phase_crossed_zero {
-            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410));
-            signal_buffer.clear();
-        }
-
-        my_value
+        
+        // TODO: Implement your synthesizer here
+        0.0
     };
 
     audioengine.set_processor_function(Box::new(synth));
 
-    let mut window = Ui::new("Ljubljana", [1280.0, 800.0], audioengine, None, None, Some(receiver));
+    let mut window = Ui::new(
+        "Synthesizer",
+        [1280.0, 800.0],
+        audioengine,
+        None,
+        None,
+        None,
+    );
 
     window.show();
 

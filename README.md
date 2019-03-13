@@ -1,78 +1,88 @@
-# Lag din egen syntesizer i Rust
+# Create your own syntesizer with Rust
 
-Formålet med workshopen er å lære litt om Rust, litt om lyd og forhåpenligvis ende opp med en syntesizer man kan bruke.
+The goal of this workshop is to learn a bit about Rust, a bit about sound, and hopefully end up with a playable syntesizer
 
-## Bygge og kjøre prosjektet
-Bygge: `cargo build`
-Kjøre: `cargo run`
+## Build and run the project
+Build: `cargo build`
+Run: `cargo run`
 
-_ Samt støtteverktøy hvis du installerte dette fra smoketesten _:
-Linting: `cargo clippy`
-Formattering: `cargo fmt`
-Auto-fiks: `cargo fix`
+# Tasks
 
+## 1. Create a simple oscillator
+An oscillator is a component that generates a periodic signal of a given frequency. There are different kinds of oscillators, but the most common are sine, sawtooth, square and triangle. Feel free to look these up.
 
-# Oppgavene
+In this task we are creating a simple oscillator. You are free to choose wich kind of periodic signal to use, but keep in mind that some signals sounds more dull than others. (Looking at you, sine wave).
 
-## 1. Lag en enkel oscillator
-En oscillator er en komponent som genererer et periodisk signal av en gitt frekvens. Det finnes ulike typer oscillatorer, men de mest brukte
-er av typene sinus, sagtann, firkant og trekant. Slå disse gjerne opp på nettet for å se hvordan disse signalene ser ut.
+Start by cloning the repo and and familiarize yourself with the code.
 
-I denne oppgaven skal du lage en enkel oscillator. Du kan selv velge hvilket periodisk signal som skal brukes for oscillatoren, men tenk på
-at ikke alle oscillatorer høres like "spennende" ut (looking at you, sine wave).
+The whole synthesizer will be implemented within the closure function `synth` located in `./main.rs`. This function will be called by the audioprocessing thread for each new sample to be generated.
 
-Begynn med å klone `rust-workshop`, og forsøk å gjøre deg litt kjent med kildekoden.
+The function takes one argument,`action`, that is an Option of `i32` which is a number from 0 to 15. This value corresponds to key currently being pressed. The `synth` function returns a value representing the oscillators output signal. _We will not need to worry about this argument until task three._
 
-Hele synthesizeren din skal defineres inne i closure-funksjonen `synth` i `./main.rs`. Denne funksjonen skal kalles av audioprosesseringstråden
-for hver nye sample som skal genereres, og funksjonen tar imot tre argumenter: funksjonens kjøretid, `t`; tid siden sist gang funksjonen ble kalt,
-`dt`, samt `action`, som inneholder en `KeyAction` dersom en knapp på tastaturet er trykket ned. Funksjonen skal returnere et flyttall
-som representerer oscillatorens utgangssignal.
+<details>
+<summary>Hint</summary>
 
-Når du har fått til å lage en oscillator, kan du flytte oscillator-funksjonaliteten ut i en egen `struct`.
+A sine oscillation wave can be expressed by the following.
 
-## 2. Visualisering av oscillatoren
-Før vi går videre med å lage en fullverdig synthesizer, ønsker vi å ha på plass en grafisk representasjon av lydbølgene vi genererer.
+y(t) = A * sin(2 &#960; &#402; t &#43; &phi;), where A, &#402;, and &phi; are constant parameters.
 
-### Litt teori: Kommunikasjon mellom tråder
-På grunn av strenge krav til behandlingstid for sanntidsaudio, kjører selve lydprosesseringsfunksjonen på en egen tråd adskilt fra
-UI-tråden. Vi blir derfor nødt å sende lydbølgen vi genererte i oppgave 1 over til UI-tråden, hvor den vil bli tegnet på skjermen.
+A = amplitude\
+&#402; = ordinary frequency. Try `440Hz`\
+&phi; = phase
 
-I mange språk foregår kommunikasjon mellom tråder i hovedsak vha begrensning av ressurs-tilgang, ofte implementert ved å bruke
-en låsetype kalt mutex (Mutual Exclusion). Dette vil si at man kun gir en tråd tilgang til å lese og modifisere en ressurs av gangen,
-og alle andre tråder må vente på tur. Applikasjoner som benytter seg av slike låser er ofte utsatt for problemer som data race,
-deadlock og starvation, og det er ofte vanskelig å luke ut disse problemene.
+Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 
-I tillegg til mutexer, har Rust også støtte for kommunikasjon mellom tråder via kanaler. Å sende et signal via en kanal vil ikke blokkere
-senderen av signalet, noe som gjør at vi kan være mer trygg på at koden vår ikke kan forårsake data race -- mottakeren er den eneste
-som potensielt kan bli blokkert, men da kun ved visse kall (f.eks. vil receiver.recv() blokkere, mens receiver.try_recv() ikke).
+You're highly encouraged to implement another type of oscillating wave:
+- [Square wave](https://en.wikipedia.org/wiki/Square_wave)
+- [Triangle wave](https://en.wikipedia.org/wiki/Triangle_wave)
+- [Sawtooth wave](https://en.wikipedia.org/wiki/Sawtooth_wave)
+</details>
 
-Nedenfor kan en se et eksempel for hvordan å opprette en kanal som sender data av typen `MyChannelType` over en kanal.
+## 2. Visualizing the oscillator
+Before we proceed with making a complete synthesizer, we wish to implement a graphical representation of the soundwaves we generate.
+
+### Some theory: Communication between threads
+Since real time audio comes with some demands, the processing is done in a  thread separate from the UI-thread. Therefore, we need to communicate the generated sound wave to the UI-thread where it will be rendered on the screen.
+
+In many languages the communication between threads are primarily done by limiting resource access, often by the use of mutexes. This limits the access to reading and modifying a resource to one thread at a time, making all other threads await their turn. Applications using this strategy often have problems with data races, deadlocks and starvation, and debugging these can be a challenge.
+
+In addition to mutexes, Rust supports communication between threads via 
+channels. Sending a signal through a channel will not block the sender, and only some calls will block the reciever. 
+
+Below, we see an example of how to create channel that sends data of the type `MyChannelType`.
 
 ```rust
 use std::sync::mpsc::channel;
 (my_sender, my_receiver) = channel::<MyChannelType>();
 ```
 
-Husk på at ved å bruke kanaler, så må man fortsatt forholde seg til Rust sine strenge krav til eierskap: Ved å sende en variabel over en kanal,
-gir man også fra seg eierskapet til variabelen.
+Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
-### Oppgave
+### Task
+In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
+
+For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
+
 I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
 av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
 objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
 
-Et hint: Datapunktene i `GraphEvent` er holdt i en datakø av typen `VecDeque<f64>`.
 
+<details>
+<summary>Hint</summary>
 
-## 3. Lag et `Keyboard`
+The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
+</details>
 
-### Sammenheng mellom toner og frekvenser
-`ISO 16` definerer at en `enstrøken A` skal ha en frekvens på _440.0 Hz_, og ut ifra denne frekvensen kan alle andre noter defineres.
-Å spille samme tone en oktav over, betyr i praksis en dobling av frekvens, uansett hvilken grunntone. Dette betyr altså at en `tostrøken A`
-har en frekvens på `440.0 * 2.0 = 880.0 Hz`, og en `trestrøken A` en frekvens på `880.0 * 2.0 = 1760.0 Hz`.
+## 3. Create the keyboard
 
-Det er tolv halvtoner i en oktav, og på grunn toner sin eksponensielle natur, betyr dette at det finnes et tall, `x`, som beskriver forholdet
-mellom alle halvtoner. Siden vi vet at å flytte en tone opp en oktav betyr en dobling av frekvens, kan vi bruke dette forholdet til å finne `x`:
+### The relation between tones and frequencies
+`ISO 16` defines the musical note of `A above middle C` to have a frequency of _440.0 Hz_, and from this frequency, all other notes can be derived.     
+
+Playing an octave higher is the same as doubling the frequency played for any given tone. `440.0 * 2.0 = 880.0 Hz` is one octave up and `880.0 * 2.0 = 1760.0 Hz` is two octaves up from the `ISO 16-A`
+
+There are twelve notes in one octave, and due to the exponential nature of notes there is a number `x` that describes the relationship between them. Since we know that moving one octave up means doubling the frequency, we can use this to find `x`:
 
 ```
 1.0 * x * x * x * x * x * x * x * x * x * x * x * x = 2.0
@@ -81,91 +91,44 @@ x = 12th_root(2.0)
 x = 1.05946309436
 ```
 
-### Oppgave
-I denne oppgaven skal du lage en komponent som tar inn en heltallsverdi (hvilken knapp som er trykket ned, øker mot høyre på tastaturet),
-og gir ut hvilken frekvens oscillatoren skal spille av.
 
-`synth(...)`-funksjonen hvor du implementerte oscillatoren i oppgave 1, tar inn et argument for hvilken knapp du har trykket på. Dette argumentet
-er av typen `KeyAction`, som er definert i `./audioengine/src/types.rs` -- ta en titt på denne typen for å finne ut hvordan den skal brukes.
-
-## 4. Implementere en forsterker og fullføre en minimal synthesizer
-Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
-vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
-når ingen knapper på tastaturet er trykket ned.
-
-### Oppgave
-Denne oppgaven går ut på å lage en forsterker-modul til vår synthesizer, som skal justere volumet på input-signalet etter en en gitt parameter,
-`gain`. Formelen som skal brukes for dette, er `output = input * gain`.
-
-Deretter skal du koble denne forsterkeren på en slik måte at den justerer volumet på output fra oscillatoren, etter `gate`-verdi fra kyboard.
+### Task
+In this task we implement a function that takes the value of the `action` parameter which correspons to the key being pressed, and returns the frequency of the note to be played. If implemented correctly, you should be able to change the sound by pressing the top two letter rows on your keyboard.
 
 
-## 5. Refaktorering
-Nå som vi har fått på plass en enkel synthesizer, er det på tide å rydde litt opp i koden for videre utvikling.
 
-### Moduler
-I Rust deler man opp prosjektet sitt i moduler. Det er opp til utvikleren selv å definere hvilke typer, funksjoner og annet som skal eksponeres
-ut fra modulen, inkludert ting som er definert i underliggende moduler.
+<details>
+<summary>Hint</summary>
 
-Dessverre er Rust-communityet ikke så veldig flink til å forklare hvordan man _faktisk_ bruker moduler i praksis, og vi vil derfor
-gi en liten oppsummering her:
+</details>
 
-#### Bruk av moduler
-Gitt at vi har en modul som heter `my_module`, med en submodul, `my_submodule`.
+## 4. Implement an amplifier 
+By now we have an oscillator that generates sound, and a keyboard that can be used to change the tone. But notice how the tone plays, even when the keyboard is not pressed.
 
-For å importere modulen vår, skriver man `mod my_module;` øverst i filen som skal bruke modulen. Gitt at det finnes en
-funksjon `my_function()` definert i `my_module`, kan man nå kalle denne funksjonen slik: `my_module::my_function();`.
+### Task
+In this task we are creating an amplifier for our synth that will adjust the 
+volume of the input signal from the oscillator in accordance with an input parameter `gate`. The formula will then be `output = input * gate`.
 
-For ergonomiens skyld ønsker man ofte å hente ut symboler fra denne modulen, slik at man heller kan skrive `my_function();`. Dette gjøres
-ved hjelp av `use`-deklarasjoner, slik som dette: `use my_module::my_function;`. Man kan bruke `use`-deklarasjoner globalt, eller innenfor et
-scope i koden.
-
-Både `mod`- og `use`-deklarasjoner støtter gruppering av symboler, slik: `use my_module::{my_function, my_other_function};`.
-
-For å eksponere submoduler ut fra en modul, må man deklarere submodulen som public: `pub mod my_submodule`.
-
-Man kan også eksponere symboler fra underliggende moduler direkte fra en modul på følgende måte: `pub use my_submodule::my_submodule_function;`.
-
-#### Filstruktur
-
-Vår modul kan defineres enten i en fil, `./my_module.rs`, eller i `mod.rs` i en underliggende mappe, slik som dette: `./my_module/mod.rs`. Vår
-submodul må plasseres i mappen `./my_module`, og kan selv defineres i enten `./my_module/my_submodule.rs` eller `./my_module/my_submodule/mod.rs`.
-
-(Kommentar: I Rust 2018 Edition kommer man ikke lenger til å bruke `mod.rs`-filer. Fra nå av vil alle moduler defineres som `my_module.rs`, og `my_submodule` vil fortsatt ligge som `my_module/my_submodule.rs`.)
+In the case where no key is pressed, the value of `gate` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. We will address this in task 5.
 
 
-### Traits
-Rust støtter ikke arv av den typen som man finner i f.eks. Java, men man kan fortsatt implementere polymorfi på følgende måter i Rust:
-1. Enums. Det er slik mange standard-typer er definert, f.eks. `std::Option` (kan være `std::Option::Some(val)` eller `std::Option::None`).
-2. Traits. Grovt sett kan disses sammenlignes med interfaces i Java, men kan også inneholde standard-implementasjoner.
+<details>
+<summary>Hint</summary>
 
-### Oppgave
-I denne oppgaven skal du refaktorere koden din ved å dele opp koden i mindre moduler, og knytte disse sammen på en fornuftig måte. Du skal selv
-definere hva som er en fornuftig måte å gjøre dette på.
+The amp can be implemented as a function, or right into the synth-function.
+</details>
 
-Det mange av komponentene i synthesizeren kommer til å ha til felles, er at de har en funksjon `process(input: f64) -> f64`, som utfører
-signalprosesseringen i komponenten. Du har allrede implementert denne funksjonaliteten for både oscillatoren og forsterkeren, og det kan lett
-tenkes at enda flere komponenter kommer til å trenge samme funksjonalitet. Du skal derfor skille ut funksjonen `process(...)` fra disse
-komponentene til et eget trait `Processor`, og implementere dette traitet for begge disse komponentene.
-
-## 6. Envelope v/ADSR
-Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
-argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
-i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
+## 5. Envelope v/ADSR
+Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-En ADSR (Attack, Decay, Sustain, Release) transformerer en gate-input til et mer dynamisk signal. For å utføre dette inneholder den en intern
-tilstandsmaskin som har tilstandende `Attack`, `Decay`, `Sustain`, `Release` og `Off`, og hvor hendelsesforløpet er som følger:
-0. (ADSR er i tilstand `Off`, med output = 0.0)
-1. `gate` går fra 0.0 til 1.0. ADSR går til tilstand `Attack`.
-2. ADSR øker output med en konfigurerbar verdi `self.attack` hver gang `process()` blir kjørt.
-3. Output når 1.0. ADSR går til tilstand `Decay`.
-4. Output minker med en konfigurerbar verdi `self.decay` hver gang `process()` blir kjørt.
-5. Output når konfigurerbar verdi `self.sustain`. ADSR går til tilstand Sustain.
-6. Output holder verdien `self.sustain` for hver gang `process()` kalles, så lenge `gate` holdes på 1.0.
-7. `gate` går fra 1.0 til 0.0. ADSR går til tilstand `Release`.
-8. Output minker med en konfigurerbar verdi `self.release` hver gang `process()` blir kjørt.
-9. Output når 0.0. ADSR går til tilstand `Off`.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. Study the following figures.
+
+![State diagram for ADSR](images/adsr-state-machine.png)
+![Envelope](images/Envelope.png)
+
+We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state.
+
 
 ### Vising av slidere i UI-et
 UI-et vi har satt opp for denne workshopen er i stand til å vise slidere som man kan bruke for å justere på parametre. Du står fri til å
@@ -182,16 +145,24 @@ noen logikk til disse.
 På samme måte som du brukte kanaler for å sende lyddata til UI-tråden i oppgave 2, må du her sende sliderdata fra UI-tråden tilbake til
 synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilken type kanalen din må ha.
 
-### Oppgave
+### Task
+
+In this task we implement the ADSR component that will be hooked in between the gate value and the output of the synth. We will then add adjustable sliders for the ADSR-values.
+
 I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
 felter for ADSR-en din til slidere i UI-et.
 
-## 7. The rest of the f*cking owl
-Nå som du har en fungerende synthesizer, står du fritt til å utvikle synthesizeren videre slik du selv ønsker at den skal høres ut.
 
-Her er noen forslag til videre forbedringer:
-- Filtre (lavpass, båndpass, høypass)
+<details>
+<summary>Hint</summary>
+
+</details>
+
+## 6. The rest of the f\*cking owl
+Now that you have a working synthesizer, you are free to develop it even further if you wish. Some suggestions:
+
+- Filters (low pass, band pass and high pass)
 - Delay
-- Romklang
-- Flanger
+- Reverb
+- Flanging
 - Portamento
