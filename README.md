@@ -50,7 +50,7 @@ In many languages the communication between threads are primarily done by limiti
 In addition to mutexes, Rust supports communication between threads via 
 channels. Sending a signal through a channel will not block the sender, and only some calls will block the reciever. 
 
-Bellow, we see an example of how to create channel that sends data of the type `MyChannelType`.
+Below, we see an example of how to create channel that sends data of the type `MyChannelType`.
 
 ```rust
 use std::sync::mpsc::channel;
@@ -60,7 +60,7 @@ use std::sync::mpsc::channel;
 Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
 ### Task
-In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectivly. You must also find out how to create an instance of `GraphEvent`
+In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
 
 
 I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
@@ -76,7 +76,7 @@ The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
 
 ## 3. Create the keyboard
 
-### The realation between tones and frequencies
+### The relation between tones and frequencies
 `ISO 16` defines the musical note of `A above middle C` to have a frequency of _440.0 Hz_, and from this frequency, all other notes can be derived.     
 
 Playing an octave higher is the same as doubling the frequency played for any given tone. `440.0 * 2.0 = 880.0 Hz` is one octave up and `880.0 * 2.0 = 1760.0 Hz` is two octaves up from the `ISO 16-A`
