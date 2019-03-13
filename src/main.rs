@@ -19,6 +19,13 @@ use ui::Ui;
 #[allow(unused_imports)]
 use std::f64::consts::PI;
 
+const C_FREQUENCY: f64 = 261.63;
+const HALFSTEP_EXP: f64 = 1.059_463_094_36;
+
+fn transform_key_action(action: Option<i32>) -> Option<f64> {
+    action.map(|v| C_FREQUENCY * HALFSTEP_EXP.powi(v))
+}
+
 #[allow(unused_variables, unused_assignments)]
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
@@ -28,6 +35,7 @@ fn main() -> Result<(), Error> {
 
     let mut time = 0.0;
     let mut phase = 0.0;
+    let mut freq = 440.0;
 
     let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
     let mut signal_buffer = SignalBuffer::new();
@@ -35,7 +43,9 @@ fn main() -> Result<(), Error> {
     let synth = move |action: Option<i32>| {
         time += time_per_sample;
 
-        let freq = 440.0;
+        if let Some(new_freq) = transform_key_action(action) {
+            freq = new_freq;
+        }
         phase += freq * time_per_sample * 2.0 * PI;
 
         let mut phase_crossed_zero = false;
