@@ -30,7 +30,7 @@ A = amplitude\
 &#402; = ordinary frequency. Try `440Hz`\
 &phi; = phase
 
-Sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
+The sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
 Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 
 You're highly encouraged to implement another type of oscillating wave:
@@ -50,7 +50,7 @@ In many languages the communication between threads are primarily done by limiti
 In addition to mutexes, Rust supports communication between threads via 
 channels. Sending a signal through a channel will not block the sender, and only some calls will block the reciever. 
 
-Bellow, we see an example of how to create channel that sends data of the type `MyChannelType`.
+Below, we see an example of how to create channel that sends data of the type `MyChannelType`.
 
 ```rust
 use std::sync::mpsc::channel;
@@ -60,13 +60,9 @@ use std::sync::mpsc::channel;
 Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
 ### Task
-In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectivly. You must also find out how to create an instance of `GraphEvent`
+In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
 
-
-I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
-av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
-objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
-
+For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
 
 <details>
 <summary>Hint</summary>
@@ -76,7 +72,7 @@ The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
 
 ## 3. Create the keyboard
 
-### The realation between tones and frequencies
+### The relation between tones and frequencies
 `ISO 16` defines the musical note of `A above middle C` to have a frequency of _440.0 Hz_, and from this frequency, all other notes can be derived.     
 
 Playing an octave higher is the same as doubling the frequency played for any given tone. `440.0 * 2.0 = 880.0 Hz` is one octave up and `880.0 * 2.0 = 1760.0 Hz` is two octaves up from the `ISO 16-A`
@@ -102,67 +98,59 @@ In this task we implement a function that takes the value of the `action` parame
 </details>
 
 ## 4. Implement an amplifier 
-Til nå har vi laget en oscillator som genererer lydbølger for oss, samt et keyboard som gjør oss i stand til å styre frekvensen til oscillatoren
-vha tastaturet. Det eneste som gjenstår nå for at programmet vårt skal kunne kalles en synthesizer, er at man også skal kunne skru av oscillatoren
-når ingen knapper på tastaturet er trykket ned.
+By now we have an oscillator that generates sound, and a keyboard that can be used to change the tone. But notice how the tone plays, even when the keyboard is not pressed.
 
 ### Task
 In this task we are creating an amplifier for our synth that will adjust the 
-volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
+volume of the input signal from the oscillator in accordance with an input parameter `gate`. The formula will then be `output = input * gate`.
+
+In the case where no key is pressed, the value of `gate` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. We will address this in task 5.
 
 
 <details>
 <summary>Hint</summary>
 
-// Skriv hint her
+The amp can be implemented as a function, or right into the synth-function.
 </details>
 
 ## 5. Envelope v/ADSR
-Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
-argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
-i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
+Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-En ADSR (Attack, Decay, Sustain, Release) transformerer en gate-input til et mer dynamisk signal. For å utføre dette inneholder den en intern
-tilstandsmaskin som har tilstandende `Attack`, `Decay`, `Sustain`, `Release` og `Off`, og hvor hendelsesforløpet er som følger:
-0. (ADSR er i tilstand `Off`, med output = 0.0)
-1. `gate` går fra 0.0 til 1.0. ADSR går til tilstand `Attack`.
-2. ADSR øker output med en konfigurerbar verdi `self.attack` hver gang `process()` blir kjørt.
-3. Output når 1.0. ADSR går til tilstand `Decay`.
-4. Output minker med en konfigurerbar verdi `self.decay` hver gang `process()` blir kjørt.
-5. Output når konfigurerbar verdi `self.sustain`. ADSR går til tilstand Sustain.
-6. Output holder verdien `self.sustain` for hver gang `process()` kalles, så lenge `gate` holdes på 1.0.
-7. `gate` går fra 1.0 til 0.0. ADSR går til tilstand `Release`.
-8. Output minker med en konfigurerbar verdi `self.release` hver gang `process()` blir kjørt.
-9. Output når 0.0. ADSR går til tilstand `Off`.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, and `Release`. Study the following figures.
 
-### Vising av slidere i UI-et
-UI-et vi har satt opp for denne workshopen er i stand til å vise slidere som man kan bruke for å justere på parametre. Du står fri til å
-velge hvor mange slidere du ønsker, hvilken range de skal ha, default-verdi og hvilken tekst som skal stå under slideren.
+![State diagram for ADSR](images/adsr-state-machine.png)
+(Value refers to the output of the ADSR)
+![Envelope](images/Envelope.png)
 
-For å vise slidere i UI-et, må du definere opp et array av `Slider`-e og sende dem inn som parameter i `Ui::new(...)`. Ta en titt i
-`./types.rs` for å se hvordan man kan lage instanser av denne typen.
+We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state. The output of the ADSR is multiplied with the audio signal.
 
-Parameteren til `Ui::new(...)` for slidere har signatur `Option<&[Slider]>`, så her må du pakke inn slider-arrayet ditt i en `Some`.
 
-Dersom du nå prøver å kjøre programmet, vil du kunne se at dine slidere blir tegnet på skjermen, men det er foreløpig ikke koblet opp
-noen logikk til disse.
+### Sliders in the UI
 
-På samme måte som du brukte kanaler for å sende lyddata til UI-tråden i oppgave 2, må du her sende sliderdata fra UI-tråden tilbake til
-synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilken type kanalen din må ha.
+The UI we are using is capeable of showing sliders that can be used to adjust parameters. You are free to implement sliders of your own choosing, their range, default value and label text.
 
-### Oppgave
-I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
-felter for ADSR-en din til slidere i UI-et.
+To show sliders in the UI, you must define an array of `Slider` and send them along as a parameter in `Ui::new(...)` in `main.rs`. Take a look in `./types.rs` to see how this type is instantiated.
 
+If you now run our program, you will see that your sliders are drawn on the screen, but they are currntly not wired up.
+
+Similarily to the way we used channels to send sound data to the UI-thread in task 2, you now have to send slider-data from the UI-thread back to the synthesizer. Look in the parameter-list of `Ui::new(...)` to find out what type your channel must have.
+
+### Task
+
+In this task we implement the ADSR component that will be hooked in between the gate value and the output of the synth. We will then add adjustable sliders for the ADSR-values.
 
 <details>
 <summary>Hint</summary>
+Remember that the output value from the ADSR is multiplied with the audio signal.
 
-// Skriv hint her
+The ADSR values in the state diagram can be thought of the duration of the state. A higher `attack` value vil give a longer ramp up.
+
+The sliders-parameter in `Ui::new(...)` has signature `Option<&[Slider]>`, so you will have to wrap the array in a `Some`.
+
 </details>
 
-## 6. The rest of the f\*cking owl
+## 6. [The rest of the f\*cking owl](https://imgur.com/gallery/nCec3EU)
 Now that you have a working synthesizer, you are free to develop it even further if you wish. Some suggestions:
 
 - Filters (low pass, band pass and high pass)
