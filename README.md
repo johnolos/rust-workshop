@@ -64,11 +64,6 @@ In this task you are going to send some data of the type `GraphEvent` (as define
 
 For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
 
-I denne oppgaven skal du sende data av typen `GraphEvent` (definert i `./types.rs`) til UI-tråden. Du må opprette en kanal som har elementer
-av denne typen, og gi sender og mottaker til henholdsvis `setup_synth()` og UI-objektet. Du må selv finne ut hvordan du skal opprette
-objekter av GraphEvent-typen, og hvordan å sende disse over kanalen.
-
-
 <details>
 <summary>Hint</summary>
 

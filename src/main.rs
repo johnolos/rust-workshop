@@ -9,7 +9,9 @@ mod types;
 mod ui;
 
 #[allow(unused_imports)]
-use audioengine::types::KeyAction;
+use audioengine::types::{KeyAction, SignalBuffer};
+
+use types::{GraphEvent, GraphEventType};
 
 #[allow(unused_imports)]
 use ui::Ui;
@@ -17,7 +19,7 @@ use ui::Ui;
 #[allow(unused_imports)]
 use std::f64::consts::PI;
 
-#[allow(unused_variables)]
+#[allow(unused_variables, unused_assignments)]
 fn main() -> Result<(), Error> {
     let audioengine = audioengine::EngineController::start();
 
@@ -25,18 +27,33 @@ fn main() -> Result<(), Error> {
     let time_per_sample = 1.0 / sample_rate;
 
     let mut time = 0.0;
+    let mut phase = 0.0;
 
-    let mut current_key = None;
+    let (sender, receiver) = std::sync::mpsc::channel::<GraphEvent>();
+    let mut signal_buffer = SignalBuffer::new();
+
     let synth = move |action: Option<i32>| {
         time += time_per_sample;
-        if action != current_key {
-            current_key = action;
 
-            println!("{:?}", action);
+        let freq = 440.0;
+        phase += freq * time_per_sample * 2.0 * PI;
+
+        let mut phase_crossed_zero = false;
+        if phase > PI {
+            phase -= 2.0 * PI;
+            phase_crossed_zero = true;
         }
-        
-        // TODO: Implement your synthesizer here
-        0.0
+
+        let my_value = phase.sin();
+
+        signal_buffer.push_back(my_value);
+
+        if phase_crossed_zero {
+            sender.send((GraphEventType::SignalGraph, signal_buffer.clone(), 4410)).expect("Unable to send graph data to UI.");
+            signal_buffer.clear();
+        }
+
+        my_value
     };
 
     audioengine.set_processor_function(Box::new(synth));
@@ -47,7 +64,7 @@ fn main() -> Result<(), Error> {
         audioengine,
         None,
         None,
-        None,
+        Some(receiver),
     );
 
     window.show();
