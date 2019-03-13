@@ -62,7 +62,7 @@ use std::sync::mpsc::channel;
 Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
 ### Task
-In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
+In this task you are going to send data to the UI-thread. You must create a channel, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. Store the data to be sendt to 
 
 For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
 
@@ -71,7 +71,7 @@ For the UI to use the receiver channel, you must pass it as an argument to the U
 
 The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
 
-We don't want to send the buffer of datapoints to the UI-thread on every call. Find some periodic event to trigger `sender.send()`.
+We don't want to send the buffer of datapoints to the UI-thread on every call. Find some _periodic_ event to trigger `sender.send()`.
 
 </details>
 
