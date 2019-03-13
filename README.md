@@ -106,35 +106,28 @@ By now we have an oscillator that generates sound, and a keyboard that can be us
 
 ### Task
 In this task we are creating an amplifier for our synth that will adjust the 
-volume of the input signal from the oscillator in accordance with an input parameter `gain`. The formula will then be `output = input * gain`.
+volume of the input signal from the oscillator in accordance with an input parameter `gate`. The formula will then be `output = input * gate`.
 
-In the case where no key is pressed, the value of `gain` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. See if you can figure out a way to ease into the full output.
+In the case where no key is pressed, the value of `gate` should be `0`. When the key is pressed, the value should be `1`. Notice, however, that this makes for a very sudden jump in volume when a key is pressed. This might be heard as a "popping" noice in your headset/speakers. We will address this in task 5.
 
 
 <details>
 <summary>Hint</summary>
 
-The amp can be implemented as a function, or right into the synth-function. In order to ease in we need to keep track of what the `gain`value was the last time the function was called, and increment it gradualy.
+The amp can be implemented as a function, or right into the synth-function.
 </details>
 
 ## 5. Envelope v/ADSR
-Vår synth er nå i stand til å spille av lyd når man trykker på tastaturet, og å være stille når man slipper knappene igjen, men det kan
-argumenteres for at den fortsatt høres litt mer ut som en justerbar summetone enn et instrument, siden den mangler punch. Dette skal du fikse
-i denne oppgaven, ved å implementere en såkalt ADSR-envelope, som skal kobles mellom gate og forsterker.
+Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
 
 ### ADSR
-En ADSR (Attack, Decay, Sustain, Release) transformerer en gate-input til et mer dynamisk signal. For å utføre dette inneholder den en intern
-tilstandsmaskin som har tilstandende `Attack`, `Decay`, `Sustain`, `Release` og `Off`, og hvor hendelsesforløpet er som følger:
-0. (ADSR er i tilstand `Off`, med output = 0.0)
-1. `gate` går fra 0.0 til 1.0. ADSR går til tilstand `Attack`.
-2. ADSR øker output med en konfigurerbar verdi `self.attack` hver gang `process()` blir kjørt.
-3. Output når 1.0. ADSR går til tilstand `Decay`.
-4. Output minker med en konfigurerbar verdi `self.decay` hver gang `process()` blir kjørt.
-5. Output når konfigurerbar verdi `self.sustain`. ADSR går til tilstand Sustain.
-6. Output holder verdien `self.sustain` for hver gang `process()` kalles, så lenge `gate` holdes på 1.0.
-7. `gate` går fra 1.0 til 0.0. ADSR går til tilstand `Release`.
-8. Output minker med en konfigurerbar verdi `self.release` hver gang `process()` blir kjørt.
-9. Output når 0.0. ADSR går til tilstand `Off`.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, `Sustain`, `Release` and `Off`. Study the following figures.
+
+![State diagram for ADSR](images/adsr-state-machine.png)
+![Envelope](images/Envelope.png)
+
+We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state.
+
 
 ### Vising av slidere i UI-et
 UI-et vi har satt opp for denne workshopen er i stand til å vise slidere som man kan bruke for å justere på parametre. Du står fri til å
@@ -151,7 +144,10 @@ noen logikk til disse.
 På samme måte som du brukte kanaler for å sende lyddata til UI-tråden i oppgave 2, må du her sende sliderdata fra UI-tråden tilbake til
 synthesizeren din. Se i parameterlisten til `Ui::new(...)` for å finne ut hvilken type kanalen din må ha.
 
-### Oppgave
+### Task
+
+In this task we implement the ADSR component that will be hooked in between the gate value and the output of the synth. We will then add adjustable sliders for the ADSR-values.
+
 I denne oppgaven skal du implemente en ADSR-komponent som skal kobles mellom gate og forsterker. Deretter skal du knytte konfigurerbare
 felter for ADSR-en din til slidere i UI-et.
 
@@ -159,7 +155,6 @@ felter for ADSR-en din til slidere i UI-et.
 <details>
 <summary>Hint</summary>
 
-// Skriv hint her
 </details>
 
 ## 6. The rest of the f\*cking owl
