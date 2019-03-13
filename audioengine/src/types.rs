@@ -1,5 +1,3 @@
-use std::collections::VecDeque;
-
 pub type Phase = f64;
 pub type Signal = f64;
 
