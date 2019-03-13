@@ -25,7 +25,7 @@ impl EngineController {
 
     pub fn set_processor_function(
         &self,
-        new_func: Box<FnMut(f64, f64, Option<i32>) -> f64 + Send>,
+        new_func: Box<FnMut(Option<i32>) -> f64 + Send>,
     ) {
         self.signal_processor_change_sender.send(new_func).unwrap();
     }
@@ -42,8 +42,8 @@ fn start_audio_thread(
     std::thread::spawn(move || {
         let mut key_action = None;
         let mut keys_state = KeysState::new();
-        let mut audio_processor_function: Box<FnMut(f64, f64, Option<i32>) -> f64 + Send> =
-            Box::new(|duration, _, _| (duration * 440.0 * 2.0 * std::f64::consts::PI).sin());
+        let mut audio_processor_function: Box<FnMut(Option<i32>) -> f64 + Send> =
+            Box::new(|_| 0.0);
 
         let device = cpal::default_output_device().expect("Failed to get default output device");
         let format = device
@@ -72,7 +72,7 @@ fn start_audio_thread(
                     buffer: cpal::UnknownTypeOutputBuffer::U16(mut buffer),
                 } => {
                     for sample in buffer.chunks_mut(format.channels as usize) {
-                        let value = ((audio_processor_function(duration, sample_time, key_action)
+                        let value = ((audio_processor_function(key_action)
                             * 0.5
                             + 0.5)
                             * f64::from(std::u16::MAX)) as u16;
@@ -86,7 +86,7 @@ fn start_audio_thread(
                     buffer: cpal::UnknownTypeOutputBuffer::I16(mut buffer),
                 } => {
                     for sample in buffer.chunks_mut(format.channels as usize) {
-                        let value = ((audio_processor_function(duration, sample_time, key_action)
+                        let value = ((audio_processor_function(key_action)
                             * 0.5
                             + 0.5)
                             * f64::from(std::i16::MAX)) as i16;
@@ -101,7 +101,7 @@ fn start_audio_thread(
                 } => {
                     for sample in buffer.chunks_mut(format.channels as usize) {
                         let value =
-                            audio_processor_function(duration, sample_time, key_action) as f32;
+                            audio_processor_function(key_action) as f32;
                         for out in sample.iter_mut() {
                             *out = value;
                         }
