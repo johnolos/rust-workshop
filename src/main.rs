@@ -22,16 +22,20 @@ fn main() -> Result<(), Error> {
 
     let mut phase = 0.0;
 
-    let mut current_key = None;
     let synth = move |action: Option<i32>| {
-        if action != current_key {
-            current_key = action;
 
-            println!("{:?}", action);
+        let freq = 440.0;
+        phase += freq * time_per_sample * 2.0 * PI;
+
+        let mut phase_crossed_zero = false;
+        if phase > PI {
+            phase -= 2.0 * PI;
+            phase_crossed_zero = true;
         }
-        
-        // TODO: Implement your synthesizer here
-        0.0
+
+        let my_value = phase.sin();
+
+        my_value
     };
 
     audioengine.set_processor_function(Box::new(synth));
