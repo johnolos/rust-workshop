@@ -33,15 +33,14 @@
         background-color: rgba(190, 190, 190, 0.3);
       }
 
-      .rust-logo-center {
-        width: 350px;
-        height: 100px;
-        background-image: url(assets/rust-logo.svg);
+      .knowit-logo-center {
+        width: 150px;
+        height: 80px;
+        background-image: url(assets/Knowit_logo_black.svg);
         background-repeat: no-repeat;
         background-position: center center;
-        background-size: 350px 100px;
-        width: 50%;
         margin: 0 auto;
+        margin-top: 200px;
       }
 
       .mb { /* mono-block */
@@ -58,7 +57,7 @@ class: center, middle
 
 # Cheatsheet
 
-<div class="rust-logo-center"></div>
+<div class="knowit-logo-center"></div>
 
 ---
 
@@ -99,21 +98,6 @@ fn main() {
   let s = "Hello, World";
   println!(s);
 }
-```
-Remember Rust is scoped and has _move_-semantics.
-```rust
-// hello is not valid here, it's not declared yet
-{
-  // hello is valid from this point forward
-  let hello = "world";
-  // do something with hello
-}
-// this scope is over, and therefore hello is no longer valid
-
-
-println!("{}", hello);
-//  9 |     println!("{}", hello)
-//    |                    ^^^^^ not found in this scope
 ```
 ---
 template: code
@@ -197,21 +181,23 @@ enum Option<T> {
   Some(T),
   None
 }
+```
 
 ---
-```
 template: code
-# if let
+###.top[.center[if let]]
 
 ```rust
 let wrapped_integer = Some(7);
 
-// The _if let_ construct reads: _if let destructures wrapped_integer into
-// Some(number), evaluate the block ({}).
+// The if let construct reads: if let destructures wrapped_integer into
+// Some(number), then evaluate the block ({}).
+
 if let Some(number) = wrapped_integer {
     println!("{}", number); // 7
 }
 ```
+Syntatic sugar for a less verbose way of handling one pattern match while ignoring the rest.
 
 ---
 template: code
@@ -220,7 +206,7 @@ template: code
 
 ```rust
 trait Animal {
-  // Statically method signature;
+  // Static method signature;
   // Self refers to the type being implemented for.
   fn new(name: &'static str) -> Self;
 
@@ -322,7 +308,7 @@ Rust has the following three rules for ownership:
 - There can only be one owner at a time.
 - When the owner goes out of scope, the value will be dropped.
 
-Furthermore, you can only have either one or more references, **or**, one mutating reference.
+Furthermore, you can only have either one or more references, **or** one mutating reference.
 
 ```rust
 // hello is not valid here, it's not declared yet
@@ -416,8 +402,9 @@ template: code
 ###.top[.center[Closures]]
 
 ```rust
-let expensive_closure = |num: u32| -> u32 {
-    println!("calculating slowly...");
+let message = "calculating slowly...";
+let expensive_closure = move |num: u32| -> u32 {
+    println!("{}", message);
     thread::sleep(Duration::from_secs(2));
     num
 };
@@ -425,6 +412,8 @@ let expensive_closure = |num: u32| -> u32 {
 let expensive_result = expensive_closure(2);
 ```
 The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
+
+The _**move**_ keyword in the closure definition is used to tell the compiler that it will take ownership of the variable _**message**_ in the parent scope.
 
 ---
 template: code
