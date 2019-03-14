@@ -99,21 +99,6 @@ fn main() {
   println!(s);
 }
 ```
-Remember Rust is scoped and has _move_-semantics.
-```rust
-// hello is not valid here, it's not declared yet
-{
-  // hello is valid from this point forward
-  let hello = "world";
-  // do something with hello
-}
-// this scope is over, and therefore hello is no longer valid
-
-
-println!("{}", hello);
-//  9 |     println!("{}", hello)
-//    |                    ^^^^^ not found in this scope
-```
 ---
 template: code
 
@@ -417,8 +402,9 @@ template: code
 ###.top[.center[Closures]]
 
 ```rust
-let expensive_closure = |num: u32| -> u32 {
-    println!("calculating slowly...");
+let message = "calculating slowly...";
+let expensive_closure = move |num: u32| -> u32 {
+    println!("{}", message);
     thread::sleep(Duration::from_secs(2));
     num
 };
@@ -426,6 +412,8 @@ let expensive_closure = |num: u32| -> u32 {
 let expensive_result = expensive_closure(2);
 ```
 The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
+
+The `move` keyword in the closure definition is used to tell the compiler that it will take ownership of the variable `message` in the parent scope.
 
 ---
 template: code
