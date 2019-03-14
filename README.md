@@ -11,13 +11,15 @@ Run: `cargo run`
 ## 1. Create a simple oscillator
 An oscillator is a component that generates a periodic signal of a given frequency. There are different kinds of oscillators, but the most common are sine, sawtooth, square and triangle. Feel free to look these up.
 
-In this task we are creating a simple oscillator. You are free to choose wich kind of periodic signal to use, but keep in mind that some signals sounds more dull than others. (Looking at you, sine wave).
+In this task we are creating a simple oscillator. You are free to choose which kind of periodic signal to use, but keep in mind that some signals sounds more dull than others. (Looking at you, sine wave).
 
 Start by cloning the repo and and familiarize yourself with the code.
 
 The whole synthesizer will be implemented within the closure function `synth` located in `./main.rs`. This function will be called by the audioprocessing thread for each new sample to be generated.
 
-The function takes one argument,`action`, that is an Option of `i32` which is a number from 0 to 15. This value corresponds to key currently being pressed. The `synth` function returns a value representing the oscillators output signal. _We will not need to worry about this argument until task three._
+The function takes one argument,`action`, that is an `Option` of `i32` which is a number from 0 to 15. This value corresponds to key currently being pressed. The `synth` function returns a value representing the oscillators output signal. _We will not need to worry about this argument until task three._
+
+When you are finished with this task you should hear a constant tone when running the program with `cargo run`. Play around with the keyboard and observe the output when pressing the top two letter rows.
 
 <details>
 <summary>Hint</summary>
@@ -31,7 +33,7 @@ A = amplitude\
 &phi; = phase
 
 The sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
-Phase are explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+Phase is explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
 
 You're highly encouraged to implement another type of oscillating wave:
 - [Square wave](https://en.wikipedia.org/wiki/Square_wave)
@@ -43,7 +45,7 @@ You're highly encouraged to implement another type of oscillating wave:
 Before we proceed with making a complete synthesizer, we wish to implement a graphical representation of the soundwaves we generate.
 
 ### Some theory: Communication between threads
-Since real time audio comes with some demands, the processing is done in a  thread separate from the UI-thread. Therefore, we need to communicate the generated sound wave to the UI-thread where it will be rendered on the screen.
+Since real time audio comes with performance demands, the audio processing is done in a thread separate from the UI-thread. Therefore, we need to communicate the generated sound wave to the UI-thread where it will be rendered on the screen.
 
 In many languages the communication between threads are primarily done by limiting resource access, often by the use of mutexes. This limits the access to reading and modifying a resource to one thread at a time, making all other threads await their turn. Applications using this strategy often have problems with data races, deadlocks and starvation, and debugging these can be a challenge.
 
@@ -60,14 +62,17 @@ use std::sync::mpsc::channel;
 Remember that when using channels, one is still bound by the ownership rules of Rust. By sending a variable down a channel, you also give up the ownership of it.
 
 ### Task
-In this task you are going to send some data of the type `GraphEvent` (as defined in `./types.rs`) to the UI-thread. You must create a channel of this type, and pass the sender and reciever to `setup_synth()` and the UI-object respectively. You must also find out how to create an instance of `GraphEvent`
+In this task you are going to send data to the UI-thread. You must create a channel, and pass the sender and reciever to `setup_synth()` and the `UI-object` respectively. Store the data to be sendt with the sender as a `Vec<f64>`, a vector of Floats.
 
-For the UI to use the receiver channel, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `GraphEvent` argument has type signature `Option<Receiver<GraphEvent>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
+For the UI to use the receiver, you must pass it as an argument to the UI constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `graphdata_rx` argument has type signature `Option<Receiver<Vec<f64>>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
 
 <details>
 <summary>Hint</summary>
 
 The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
+
+We don't want to send the buffer of datapoints to the UI-thread on every call. Find some _periodic_ event to trigger `sender.send()`.
+
 </details>
 
 ## 3. Create the keyboard
@@ -91,9 +96,13 @@ x = 1.05946309436
 In this task we implement a function that takes the value of the `action` parameter which correspons to the key being pressed, and returns the frequency of the note to be played. If implemented correctly, you should be able to change the sound by pressing the top two letter rows on your keyboard.
 
 
-
 <details>
 <summary>Hint</summary>
+Given that `A above middle C` is 440hz `Middle C` is 261.63 hz.
+
+The value of the a-key on your keyboard is 0, and the corresponding tone played should be a `Middle C`.
+
+The next key (w) should produce the C♯ tone, wich is equal to the value of C times 1.05946309436 and so on.
 
 </details>
 
@@ -114,16 +123,16 @@ The amp can be implemented as a function, or right into the synth-function.
 </details>
 
 ## 5. Envelope v/ADSR
-Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the amplifier.
+Our syntesizer will now play only when keys are pressed, but it still sounds a bit boring. We will now fix this by implementing an ADSR-envelope that will be hooked in between the `gate` and the output.
 
 ### ADSR
-An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input to a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, and `Release`. Study the following figures.
+An ADSR (Attack, Decay, Sustain, Release) transforms a gate-input into a more dynamic signal. It contains an internal state-machine wih the states `Attack`, `Decay`, and `Release`. Study the following figures.
 
 ![State diagram for ADSR](images/adsr-state-machine.png)
 (Value refers to the output of the ADSR)
 ![Envelope](images/Envelope.png)
 
-We see that when the `gate` value (red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state. The output of the ADSR is multiplied with the audio signal.
+We see that when the `gate` value (the red dashed line) goes from 0 to 1 (when we press a key), the output value goes through the `attack`, `decay` and `sustain` state. When a key is released, the ADSR goes to the apropriatly named `release` state. The output of the ADSR is multiplied with the audio signal.
 
 
 ### Sliders in the UI
