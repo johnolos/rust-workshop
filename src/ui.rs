@@ -1,11 +1,12 @@
 extern crate conrod;
 
-use audioengine::types::SignalBuffer;
 use audioengine::EngineController;
 use event_loop;
 use std::path::Path;
 use std::sync::mpsc::Sender;
-use types::{GraphEvent, GraphEventType, Slider, SliderEvent};
+use types::{Slider, SliderEvent};
+
+use std::collections::VecDeque;
 
 use conrod::color;
 use std::sync::mpsc::Receiver;
@@ -37,9 +38,8 @@ pub struct Ui<'a> {
     renderer: conrod::backend::glium::Renderer,
     audioengine: EngineController,
     slider_tx: Option<Sender<SliderEvent>>,
-    graphdata_rx: Option<Receiver<GraphEvent>>,
-    signal_buffer: SignalBuffer,
-    fft_buffer: SignalBuffer,
+    graphdata_rx: Option<Receiver<Vec<f64>>>,
+    signal_buffer: VecDeque<f64>,
 }
 
 impl<'a> Ui<'a> {
@@ -49,10 +49,9 @@ impl<'a> Ui<'a> {
         audioengine: EngineController,
         sliders: Option<&'a [Slider]>,
         slider_tx: Option<Sender<SliderEvent>>,
-        graphdata_rx: Option<Receiver<GraphEvent>>,
+        graphdata_rx: Option<Receiver<Vec<f64>>>,
     ) -> Self {
-        let signal_buffer: SignalBuffer = (0..2048).map(|_| 0.0).collect();
-        let fft_buffer: SignalBuffer = (0..2048).map(|_| 0.0).collect();
+        let signal_buffer: VecDeque<f64> = (0..2048).map(|_| 0.0).collect();
         use conrod::glium;
 
         let events_loop = glium::glutin::EventsLoop::new();
@@ -93,7 +92,6 @@ impl<'a> Ui<'a> {
             slider_tx,
             graphdata_rx,
             signal_buffer,
-            fft_buffer,
         }
     }
 
@@ -111,7 +109,6 @@ impl<'a> Ui<'a> {
             slider_tx,
             graphdata_rx,
             ref mut signal_buffer,
-            ref mut fft_buffer,
             ..
         } = self;
 
@@ -187,21 +184,13 @@ impl<'a> Ui<'a> {
             let graphdata_rx_iter = graphdata_rx.iter().flat_map(|x| x.try_iter());
 
             // Check if we have incomming signal on reciever-channel and push it to our buffer
-            for (event_type, signal_frame, size) in graphdata_rx_iter {
-                match event_type {
-                    GraphEventType::SignalGraph => for signal in signal_frame {
-                        signal_buffer.push_back(signal);
-                        while signal_buffer.len() > size {
-                            signal_buffer.pop_front();
-                        }
-                    },
-                    GraphEventType::FFTGraph => for signal in signal_frame {
-                        fft_buffer.push_back(signal);
-                        while fft_buffer.len() > size {
-                            fft_buffer.pop_front();
-                        }
-                    },
-                };
+            for signal_frame in graphdata_rx_iter {
+                for signal in signal_frame {
+                    signal_buffer.push_back(signal);
+                    while signal_buffer.len() > 4410 {
+                        signal_buffer.pop_front();
+                    }
+                }
             }
 
             // Draw the widgets
@@ -261,20 +250,12 @@ impl<'a> Ui<'a> {
                 // signal plot
                 widget::PlotPath::new(0, signal_buffer.len(), -1.0, 1.0, |x| {
                     signal_buffer[x].max(-1.0).min(1.0)
-                }).w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
+                })
+                .w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
                 .middle_of(ids.signal_plot_background)
                 .color(conrod::color::DARK_BLUE)
                 .thickness(1.0)
                 .set(ids.signal_plot_1, ui);
-
-                // fft plot
-                widget::PlotPath::new(0, fft_buffer.len(), 0.0, 2.0, |x| {
-                    fft_buffer[x].max(0.0).min(2.0)
-                }).w_h(width, SIGNAL_PLOT_HEIGHT - 10.0)
-                .middle_of(ids.signal_plot_background)
-                .color(conrod::color::DARK_RED)
-                .thickness(1.0)
-                .set(ids.signal_plot_2, ui);
 
                 // Plotting sliders and their assosiated text labels
 

@@ -1,9 +1,7 @@
-use std::collections::VecDeque;
-
 pub type Phase = f64;
 pub type Signal = f64;
 
-pub type SignalProcessorFunction = Box<FnMut(f64, f64, Option<i32>) -> Signal>;
+pub type SignalProcessorFunction = Box<FnMut(Option<i32>) -> Signal + Send>;
 
 #[derive(Clone, Copy)]
 pub enum KeyAction {
@@ -12,4 +10,4 @@ pub enum KeyAction {
 }
 
 pub type SignalFrame = Vec<Signal>;
-pub type SignalBuffer = VecDeque<Signal>;
+pub type SignalBuffer = Vec<Signal>;

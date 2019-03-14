@@ -33,15 +33,14 @@
         background-color: rgba(190, 190, 190, 0.3);
       }
 
-      .rust-logo-center {
-        width: 350px;
-        height: 100px;
-        background-image: url(assets/rust-logo.svg);
+      .knowit-logo-center {
+        width: 150px;
+        height: 80px;
+        background-image: url(assets/Knowit_logo_black.svg);
         background-repeat: no-repeat;
         background-position: center center;
-        background-size: 350px 100px;
-        width: 50%;
         margin: 0 auto;
+        margin-top: 200px;
       }
 
       .mb { /* mono-block */
@@ -58,26 +57,31 @@ class: center, middle
 
 # Cheatsheet
 
-<div class="rust-logo-center"></div>
+<div class="knowit-logo-center"></div>
 
 ---
 
 # Contents
 
 1. Basic syntax
-2. Variabler
+2. Variables
 3. Structs
 4. Enums
-5. Traits
-6. Impl
-7. Pattern-matching
-8. Ownership
-9. References
-10. Threads and channels
-11. clippy
-12. rustfmt
-13. rustfix
-14. Nyttige ressuers
+5. if let
+6. Traits
+7. Impl
+8. Pattern-matching
+9. Ownership
+10. Moved values
+11. Moved values (Copy)
+12. Moved values (Clone)
+13. References
+14. Closures
+15. Threads and channels
+16. clippy
+17. rustfmt
+18. rustfix
+19. Resources
 
 ---
 name: code
@@ -88,32 +92,17 @@ template: code
 
 ###.top[.center[Basic syntax]]
 
-Klassisk "Hello, World" eksempel.
+A classic "Hello, World" example.
 ```rust
 fn main() {
   let s = "Hello, World";
   println!(s);
 }
 ```
-Husk at variabler er scoped og Rust har _move_-semantics.
-```rust
-// hello is not valid here, it's not declared yet
-{
-  // hello is valid from this point forward
-  let hello = "world";
-  // do something with hello
-}
-// this scope is over, and therefore hello is no longer valid
-
-
-println!("{}", hello);
-//  9 |     println!("{}", hello)
-//    |                    ^^^^^ not found in this scope
-```
 ---
 template: code
 
-###.top[.center[Variabler]]
+###.top[.center[Variables]]
 
 Immutable by default
 ```rust
@@ -131,7 +120,7 @@ Immutable by default
 //    |     ^^^^^ cannot assign twice to immutable variable
 ```
 
-Bruk _mut_ for å fortelle rust at variabelen kan endres.
+Use _mut_ to allow mutation of an assigned variable.
 ```rust
 {
   let mut x = 5;
@@ -161,9 +150,9 @@ fn main() {
   println!("{:?}", e) // Employee { name: "Jon Snow", id: 230 }
 }
 ```
-<p class="mb">__#[derive(Debug)]__</p> brukes for å kunne printe innholdet i en struct. <br/>
+<p class="mb">__#[derive(Debug)]__</p> is used to print the contents of structs. <br/>
 
-<div>Merk at vi bruker <p class="mb">"{:?}"</p> for debug-print i stedet for vanligvis <p class="mb">"{}"</p>.</div>
+<div>We use <p class="mb">"{:?}"</p> to debug-println rather than <p class="mb">"{}"</p>.</div>
 ---
 template: code
 
@@ -196,19 +185,36 @@ enum Option<T> {
 
 ---
 template: code
+###.top[.center[if let]]
+
+```rust
+let wrapped_integer = Some(7);
+
+// The if let construct reads: if let destructures wrapped_integer into
+// Some(number), then evaluate the block ({}).
+
+if let Some(number) = wrapped_integer {
+    println!("{}", number); // 7
+}
+```
+Syntatic sugar for a less verbose way of handling one pattern match while ignoring the rest.
+
+---
+template: code
 
 ###.top[.center[Traits]]
 
 ```rust
 trait Animal {
-  // Statically method signature; Self refers to the type being implemented for.
+  // Static method signature;
+  // Self refers to the type being implemented for.
   fn new(name: &'static str) -> Self;
 
   // Method signatures for the instance
   fn name(&self) -> &'static str;
   fn noise(&self) -> &'static str;
 
-  // Traits can define default implementation
+  // Traits can define a default implementation
   fn talk(&self) {
       println!("{} says {}", self.name(), self.noise());
   }
@@ -241,9 +247,9 @@ impl Animal for Sheep {
 
     fn noise(&self) -> &'static str {...}
 
-    // Default implementation overridden
+    // default implementation overridden
     fn talk(&self) {
-      // Another implementation
+      // another implementation
     }
 }
 ```
@@ -297,13 +303,12 @@ template: code
 
 ###.top[.center[Ownership]]
 
-Rust har tre enkle regler til eierskap:
-- Enhver verdi i Rust har en variabel som forteller hvem som eier den.
-- Det finnes bare en eier til enhver tid.
-- Når eieren ikke finnes i scope lengere, så vil verdien deallokeres eller droppes.
+Rust has the following three rules for ownership:
+- Each value in Rust has a variable that’s called its owner.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
 
-Enten én eller flere referanser <u>**eller**</u> én muterende referanse.
-
+Furthermore, you can only have either one or more references, **or** one mutating reference.
 
 ```rust
 // hello is not valid here, it's not declared yet
@@ -312,11 +317,53 @@ Enten én eller flere referanser <u>**eller**</u> én muterende referanse.
   let hello = "world";
   // do something with hello
 }
-// this scope is over, and therefore hello is no longer valid
+// this scope is over, and therefore hello is no longer valid.
 
 println!("{}", hello);
 //  9 |     println!("{}", hello)
 //    |                    ^^^^^ not found in this scope
+```
+
+---
+###.top[.center[Moved values]]
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+
+println!("{}, world!", s1);
+```
+
+```bash
+error[E0382]: use of moved value: s1
+ --> src/main.rs:5:28
+  |
+3 |     let s2 = s1;
+  |         -- value moved here
+4 |
+5 |     println!("{}, world!", s1);
+  |                            ^^ value used here after move
+  |
+  = note: move occurs because s1 has type std::string::String, which does
+  not implement the Copy trait
+```
+---
+###.top[.center[Moved values (Copy)]]
+
+```rust
+let x = 5;
+let y = x;
+println!("{}", x); // 5
+```
+
+---
+###.top[.center[Moved values (Clone)]]
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1.clone();
+
+println!("s1 = {}, s2 = {}", s1, s2);
 ```
 
 ---
@@ -349,6 +396,24 @@ fn main() {
   // TransferApi { api_key: "secret_api_key" }
 }
 ```
+---
+template: code
+
+###.top[.center[Closures]]
+
+```rust
+let message = "calculating slowly...";
+let expensive_closure = move |num: u32| -> u32 {
+    println!("{}", message);
+    thread::sleep(Duration::from_secs(2));
+    num
+};
+
+let expensive_result = expensive_closure(2);
+```
+The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
+
+The _**move**_ keyword in the closure definition is used to tell the compiler that it will take ownership of the variable _**message**_ in the parent scope.
 
 ---
 template: code
@@ -386,16 +451,16 @@ template: code
 
 ###.top[.center[clippy (recommended)]]
 
-__clippy__ hjelper deg med å fange vanlige programmeringsfeil i rust.
+__clippy__ helps you catch common mistakes in Rust, whether it is a linting error or common code mistake.
 
-### Intallering
+### Installation
 
 ```bash
 $ rustup component add clippy-preview
 ```
 
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo clippy
@@ -406,16 +471,16 @@ template: code
 
 ###.top[.center[rustfmt (optional)]]
 
-__rustfmt__ formaterer rust-koden din til ett sett med standardregler.
+__rustfmt__ formats your code following a set of standardized rules.
 
-### Intallering
+### Installation
 
 ```bash
 $ rustup component add rustfmt-preview
 ```
 
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo fmt
@@ -426,32 +491,32 @@ template: code
 
 ###.top[.center[rustfix (optional)]]
 
-__rustfix__ utfører forslag som rust-kompilatoren foreslår.
+__rustfix__ automatically applies the suggestions the __rustc__-compiler suggests.
 
-Verktøyet er veldig nytt og gir ikke alt for mye nytteverdi, men verdt å nevne.
+As a tooling, __rustfix__, is certainly on the newer side of things. However, it is worthy of a mention.
 
-### Intallering
+### Installation
 
 ```bash
 $ cargo install cargo-fix
 ```
 
-### Bruk
+### Usage
 
 ```bash
 $ cargo fix
 ```
 
 ---
+###.top[.center[Useful resources]]
 
-# Nyttige ressuser
+Online Book: [__Rust by example__](https://doc.rust-lang.org/stable/rust-by-example/)
 
-* [https://doc.rust-lang.org/stable/rust-by-example/](https://doc.rust-lang.org/stable/rust-by-example/)
+__Rust by example__ is a online introductory book for Rust where, as the name suggests,
+teach you by showing you examples. In fact, some of them you have already seen in this cheatsheet.
 
-
-Endel av eksemplene i denne presentasjonen er hetet fra samme bok.
-
-Anbefales å lese utdrag fra den boken skulle man stå fast.
+It is highly encouraged to seek out help, or put your mind at rest by reading some of the chapter.
+Perhaps the chapter about ownerships?
 
     </textarea>
     <script src="https://remarkjs.com/downloads/remark-latest.min.js">
