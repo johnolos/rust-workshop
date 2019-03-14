@@ -69,7 +69,7 @@ For the UI to use the receiver, you must pass it as an argument to the UI constr
 <details>
 <summary>Hint</summary>
 
-The data points in `GraphEvent` are held in a queue og type `VecDeque<f64>`.
+The data points in `GraphEvent` are held in a queue of type `VecDeque<f64>`.
 
 We don't want to send the buffer of datapoints to the UI-thread on every call. Find some _periodic_ event to trigger `sender.send()`.
 
