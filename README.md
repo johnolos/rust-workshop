@@ -26,14 +26,12 @@ When you are finished with this task you should hear a constant tone when runnin
 
 A sine oscillation wave can be expressed by the following.
 
-y(t) = A * sin(2 &#960; &#402; t &#43; &phi;), where A, &#402;, and &phi; are constant parameters.
-
-A = amplitude\
-&#402; = ordinary frequency. Try `440Hz`\
-&phi; = phase
-
-The sinusiod function is explained in detail [here](https://en.wikipedia.org/wiki/Sine_wave).
-Phase is explained in detail [here](https://en.wikipedia.org/wiki/Phase_(waves)#Formula_for_phase_of_an_oscillation_or_a_wave).
+```
+let mut this_phase = previous_phase + (frequency * 2.0 * PI / sample_rate);
+this_phase = if this_phase > PI { this_phase - 2.0 * PI } else { this_phase };
+previous_phase = this_phase;
+let this_value = this_phase.value();
+```
 
 You're highly encouraged to implement another type of oscillating wave:
 - [Square wave](https://en.wikipedia.org/wiki/Square_wave)
