@@ -181,21 +181,23 @@ enum Option<T> {
   Some(T),
   None
 }
+```
 
 ---
-```
 template: code
-# if let
+###.top[.center[if let]]
 
 ```rust
 let wrapped_integer = Some(7);
 
-// The _if let_ construct reads: _if let destructures wrapped_integer into
-// Some(number), evaluate the block ({}).
+// The if let construct reads: if let destructures wrapped_integer into
+// Some(number), then evaluate the block ({}).
+
 if let Some(number) = wrapped_integer {
     println!("{}", number); // 7
 }
 ```
+Syntatic sugar for a less verbose way of handling one pattern match while ignoring the rest.
 
 ---
 template: code
@@ -204,7 +206,7 @@ template: code
 
 ```rust
 trait Animal {
-  // Statically method signature;
+  // Static method signature;
   // Self refers to the type being implemented for.
   fn new(name: &'static str) -> Self;
 
@@ -306,7 +308,7 @@ Rust has the following three rules for ownership:
 - There can only be one owner at a time.
 - When the owner goes out of scope, the value will be dropped.
 
-Furthermore, you can only have either one or more references, **or**, one mutating reference.
+Furthermore, you can only have either one or more references, **or** one mutating reference.
 
 ```rust
 // hello is not valid here, it's not declared yet
@@ -411,7 +413,7 @@ let expensive_result = expensive_closure(2);
 ```
 The following defines and assigns a closure, an anonymous function to the __expensive_closure__ variable.
 
-The `move` keyword in the closure definition is used to tell the compiler that it will take ownership of the variable `message` in the parent scope.
+The _**move**_ keyword in the closure definition is used to tell the compiler that it will take ownership of the variable _**message**_ in the parent scope.
 
 ---
 template: code
