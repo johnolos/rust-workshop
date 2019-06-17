@@ -1,4 +1,3 @@
-
 #[allow(dead_code)]
 pub struct Slider {
     pub min: f64,
