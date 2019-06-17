@@ -100,7 +100,7 @@ x = 1.05946309436
 
 ### Task
 
-In this task we now are interested in using the `action`-parameter we spoke of earlier. The `action` is a optional interger value of what note is being pressed, and you should now return the frequency of said note. If implemented correctly, you should be able to change the sound by pressing the top two letter rows on your keyboard.
+In this task we are interested in using the `action`-parameter we spoke of earlier. The `action` is a optional interger value of what note is being pressed, and you should now return the frequency of said note. If implemented correctly, you should be able to change the sound by pressing the top two letter rows on your keyboard.
 
 `A = 0`, `W = 1`, `S = 2`, `E = 3`, ... , `P = 15`. This resembles a traditional piano layout.
 

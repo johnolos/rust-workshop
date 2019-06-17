@@ -43,7 +43,7 @@ fn main() -> Result<(), Error> {
 
         /*
         TODO: Your implementation of a synthesizer should be here.
-        Start with returning an oscilating wave determined by the `time`-variable
+        Start with returning an oscillating wave determined by the `time`-variable
         */
         0.0
     };
