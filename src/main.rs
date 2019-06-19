@@ -29,7 +29,7 @@ fn main() -> Result<(), Error> {
     let mut current_key = None;
 
     /*
-    `move` keyword here means that values defined in the current scope are moved into whats essentially is a closure.
+    The `move` keyword here means that values defined in the current scope are moved into whats essentially is a closure.
     The closure will be called thousands of times each second.
     You typically would want to define variables in this scope and move them inside the closure as allocation is costly.
     */

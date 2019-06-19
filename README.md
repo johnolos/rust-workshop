@@ -67,7 +67,7 @@ Remember that when using channels, one is still bound by the ownership rules of 
 
 ### Task
 
-In this task you are going to send graphical data representaion of your oscillating wave to the UI-thread.
+In this task you are going to send a buffer of your oscillating sound wave to the UI-thread.
 You must create a channel for the passing of said data, and for the ui to use the receiver, you must pass it as an argument to the ui constructor function, `Ui::new(...)`. If you look at this constructor function, you'll see that the `graphdata_rx` argument has type signature `Option<Receiver<Vec<f64>>>`, which means that you'll have to wrap the channel receiver in an option, like this: `Some(receiver)`.
 
 <details>
