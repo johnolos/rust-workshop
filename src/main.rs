@@ -27,6 +27,12 @@ fn main() -> Result<(), Error> {
     let mut time = 0.0;
 
     let mut current_key = None;
+
+    /*
+    The `move` keyword here means that values defined in the current scope are moved into whats essentially is a closure.
+    The closure will be called thousands of times each second.
+    You typically would want to define variables in this scope and move them inside the closure as allocation is costly.
+    */
     let synth = move |action: Option<i32>| {
         time += time_per_sample;
         if action != current_key {
@@ -34,8 +40,11 @@ fn main() -> Result<(), Error> {
 
             println!("{:?}", action);
         }
-        
-        // TODO: Implement your synthesizer here
+
+        /*
+        TODO: Your implementation of a synthesizer should be here.
+        Start with returning an oscillating wave determined by the `time`-variable
+        */
         0.0
     };
 
