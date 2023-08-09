@@ -25,6 +25,7 @@ fn main() -> Result<(), Error> {
     let time_per_sample = 1.0 / sample_rate;
 
     let mut time = 0.0;
+    
 
     let mut current_key = None;
 
@@ -40,11 +41,18 @@ fn main() -> Result<(), Error> {
 
             println!("{:?}", action);
         }
-
         /*
         TODO: Your implementation of a synthesizer should be here.
         Start with returning an oscillating wave determined by the `time`-variable
         */
+        // added the recommended code and changed it until it stopped giving errors but it is like not exactly working either
+        //by not exactly working i mostly mean bc the audio / ui isnt intergrated yet i cant see/hear it
+        // i aksi dont know the implications of adding a defailt previous phase value but it had to initialize to something in order to compile. also had to define some stuff
+        let mut previous_phase = 1.0;
+        let mut this_phase:f64 = previous_phase + (time_per_sample * 2.0 * PI / sample_rate);
+        this_phase = if this_phase > PI { this_phase - 2.0 * PI } else { this_phase };
+        previous_phase = this_phase;
+        let this_value = this_phase;
         0.0
     };
 
