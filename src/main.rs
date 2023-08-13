@@ -7,7 +7,7 @@ extern crate audioengine;
 mod event_loop;
 mod types;
 mod ui;
-
+use std::sync::mpsc::channel;
 #[allow(unused_imports)]
 use audioengine::types::KeyAction;
 
@@ -16,6 +16,8 @@ use ui::Ui;
 
 #[allow(unused_imports)]
 use std::f64::consts::PI;
+#[allow(unused_imports)]
+use std::sync::mpsc::Receiver;
 
 #[allow(unused_variables)]
 fn main() -> Result<(), Error> {
@@ -23,10 +25,13 @@ fn main() -> Result<(), Error> {
 
     let sample_rate = audioengine.sample_rate;
     let time_per_sample = 1.0 / sample_rate;
-
+    let frequency = 300.0;
     let mut time = 0.0;
-    
-
+    let mut previous_phase = 0.0;
+    let my_sender;
+    let my_reciever;
+    //let visualizer: fn(sender,reciever) -> (std::sync::mpsc::Sender<_>, Receiver<_>) = channel::<;
+    let my_channel = (my_sender,my_reciever) = channel::<Vec<f64>>;
     let mut current_key = None;
 
     /*
@@ -48,12 +53,15 @@ fn main() -> Result<(), Error> {
         // added the recommended code and changed it until it stopped giving errors but it is like not exactly working either
         //by not exactly working i mostly mean bc the audio / ui isnt intergrated yet i cant see/hear it
         // i aksi dont know the implications of adding a defailt previous phase value but it had to initialize to something in order to compile. also had to define some stuff
-        let mut previous_phase = 1.0;
-        let mut this_phase:f64 = previous_phase + (time_per_sample * 2.0 * PI / sample_rate);
+        
+        let mut this_phase:f64 = previous_phase + (frequency*2.0 * PI / sample_rate);
         this_phase = if this_phase > PI { this_phase - 2.0 * PI } else { this_phase };
         previous_phase = this_phase;
-        let this_value = this_phase;
-        0.0
+        let this_value = this_phase.sin();
+        
+        this_value
+        
+       // (this_value, graphdata_rx) = channel::Some(<Receiver<Vec<f64>>>);
     };
 
     audioengine.set_processor_function(Box::new(synth));
@@ -64,7 +72,7 @@ fn main() -> Result<(), Error> {
         audioengine,
         None,
         None,
-        None,
+        Some(my_reciever),
     );
 
     window.show();
